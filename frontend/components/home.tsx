@@ -33,6 +33,7 @@ const Terminal = dynamic(() => import("@/components/terminal"), {
   ssr: false,
 });
 import { Button } from "@/components/ui/button";
+import ModelSelector, { MODEL_OPTIONS } from "@/components/model-selector";
 import {
   ActionStep,
   AgentEvent,
@@ -62,6 +63,7 @@ export default function Home() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [isUseDeepResearch, setIsUseDeepResearch] = useState(false);
+  const [modelName, setModelName] = useState<string>(MODEL_OPTIONS[0]);
   const [deviceId, setDeviceId] = useState<string>("");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isLoadingSession, setIsLoadingSession] = useState(false);
@@ -295,6 +297,7 @@ export default function Home() {
         JSON.stringify({
           type: "init_agent",
           content: {
+            model_name: modelName,
             tool_args: {
               deep_research: isUseDeepResearch,
               pdf: true,
@@ -851,6 +854,8 @@ export default function Home() {
         <LayoutGroup>
           <AnimatePresence mode="wait">
             {!isInChatView ? (
+              <div className="space-y-4">
+                <ModelSelector model={modelName} setModel={setModelName} />
               <QuestionInput
                 placeholder="Give II-Agent a task to work on..."
                 value={currentQuestion}
@@ -865,6 +870,7 @@ export default function Home() {
                 isGeneratingPrompt={isGeneratingPrompt}
                 handleEnhancePrompt={handleEnhancePrompt}
               />
+              </div>
             ) : (
               <motion.div
                 key="chat-view"

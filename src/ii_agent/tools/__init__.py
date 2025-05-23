@@ -12,7 +12,7 @@ TOOLS_NEED_INPUT_TRUNCATION = {
 }
 
 # Tools that need output truncation with file save (ToolFormattedResult)
-TOOLS_NEED_OUTPUT_FILE_SAVE = {VisitWebpageTool.name}
+TOOLS_NEED_OUTPUT_FILE_SAVE = {VisitWebpageTool.name, "tavily_visit_webpage"}
 
 __all__ = [
     "AgentToolManager",
