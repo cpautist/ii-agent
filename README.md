@@ -120,6 +120,9 @@ STATIC_FILE_BASE_URL=http://localhost:8000/
 ANTHROPIC_API_KEY=
 #If you are using Goolge Vertex (recommended if you have permission extra throughput)
 #GOOGLE_APPLICATION_CREDENTIALS=
+#If you are using OpenRouter
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 ```
 
 ### Frontend Environment Variables
@@ -160,12 +163,18 @@ If you want to use vertex, set `GOOGLE_APPLICATION_CREDENTIALS` in `.env` file a
 python cli.py --project-id YOUR_PROJECT_ID --region YOUR_REGION
 ```
 
+If you want to use OpenRouter, set `OPENROUTER_API_KEY` in `.env` and run:
+```bash
+python cli.py --llm-client openrouter-direct --model-name <MODEL_NAME>
+```
+
 Options:
 - `--project-id`: Google Cloud project ID
 - `--region`: Google Cloud region (e.g., us-east5)
 - `--workspace`: Path to the workspace directory (default: ./workspace)
 - `--needs-permission`: Require permission before executing commands
 - `--minimize-stdout-logs`: Reduce the amount of logs printed to stdout
+- `--model-name`: Model to use with the selected backend
 
 ### Web Interface
 
@@ -181,6 +190,12 @@ When using Vertex:
 ```bash
 export STATIC_FILE_BASE_URL=http://localhost:8000
 python ws_server.py --port 8000 --project-id YOUR_PROJECT_ID --region YOUR_REGION
+```
+
+When using OpenRouter:
+```bash
+export STATIC_FILE_BASE_URL=http://localhost:8000
+python ws_server.py --port 8000 --llm-client openrouter-direct --model-name <MODEL_NAME>
 ```
 
 2. Start the frontend (in a separate terminal):
