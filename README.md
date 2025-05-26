@@ -22,7 +22,7 @@ https://github.com/user-attachments/assets/d0eb7440-a6e2-4276-865c-a1055181bb33
 
 ## Overview
 
-II Agent is built around providing an agentic interface to Anthropic Claude models. It offers:
+II Agent provides an agentic interface to OpenRouter models by default and can also run on Anthropic Claude or Vertex AI. It offers:
 
 - A CLI interface for direct command-line interaction
 - A WebSocket server that powers a modern React-based frontend
@@ -95,7 +95,7 @@ You can view the full traces of some samples here: [GAIA Benchmark Traces](https
 
 - Python 3.10+
 - Node.js 18+ (for frontend)
-- Google Cloud project with Vertex AI API enabled or Anthropic API key
+- OpenRouter API key (default) or Anthropic/Vertex credentials
 
 ## Environment
 
@@ -116,9 +116,12 @@ TAVILY_API_KEY=your_tavily_key
 
 STATIC_FILE_BASE_URL=http://localhost:8000/
 
+#If you are using OpenRouter (default)
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 #If you are using Anthropic client
 ANTHROPIC_API_KEY=
-#If you are using Goolge Vertex (recommended if you have permission extra throughput)
+#If you are using Google Vertex (optional)
 #GOOGLE_APPLICATION_CREDENTIALS=
 ```
 
@@ -150,14 +153,19 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ### Command Line Interface
 
-If you want to use anthropic client, set `ANTHROPIC_API_KEY` in `.env` file and run:
+By default the agent uses OpenRouter with the Gemini 2.5 Flash model.
+Set `OPENROUTER_API_KEY` in `.env` and run:
 ```bash
-python cli.py 
+python cli.py
 ```
 
-If you want to use vertex, set `GOOGLE_APPLICATION_CREDENTIALS` in `.env` file and run:
+If you want to use Vertex, set `GOOGLE_APPLICATION_CREDENTIALS` in `.env` file and run:
 ```bash
 python cli.py --project-id YOUR_PROJECT_ID --region YOUR_REGION
+```
+If you want to use Anthropic instead, set `ANTHROPIC_API_KEY` and run:
+```bash
+python cli.py --llm-client anthropic-direct
 ```
 
 Options:
@@ -166,12 +174,11 @@ Options:
 - `--workspace`: Path to the workspace directory (default: ./workspace)
 - `--needs-permission`: Require permission before executing commands
 - `--minimize-stdout-logs`: Reduce the amount of logs printed to stdout
+- `--llm-client`: Backend LLM client (`openrouter-direct`, `anthropic-direct`, or `openai-direct`)
 
 ### Web Interface
 
-1. Start the WebSocket server:
-
-When using Anthropic client:
+1. Start the WebSocket server (OpenRouter is the default):
 ```bash
 export STATIC_FILE_BASE_URL=http://localhost:8000
 python ws_server.py --port 8000
@@ -181,6 +188,11 @@ When using Vertex:
 ```bash
 export STATIC_FILE_BASE_URL=http://localhost:8000
 python ws_server.py --port 8000 --project-id YOUR_PROJECT_ID --region YOUR_REGION
+```
+When using Anthropic instead:
+```bash
+export STATIC_FILE_BASE_URL=http://localhost:8000
+python ws_server.py --port 8000 --llm-client anthropic-direct
 ```
 
 2. Start the frontend (in a separate terminal):

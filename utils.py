@@ -55,6 +55,13 @@ def parse_common_args(parser: ArgumentParser):
         help="Region to use for Anthropic",
     )
     parser.add_argument(
+        "--llm-client",
+        type=str,
+        default="openrouter-direct",
+        choices=["anthropic-direct", "openai-direct", "openrouter-direct"],
+        help="LLM backend to use",
+    )
+    parser.add_argument(
         "--context-manager",
         type=str,
         default="file-based",

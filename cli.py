@@ -92,13 +92,13 @@ async def async_main():
         )
 
     # Initialize LLM client
-    client = get_client(
-        "anthropic-direct",
-        model_name=DEFAULT_MODEL,
-        use_caching=False,
-        project_id=args.project_id,
-        region=args.region,
-    )
+    client_kwargs = {
+        "model_name": DEFAULT_MODEL,
+        "use_caching": False,
+    }
+    if args.llm_client == "anthropic-direct":
+        client_kwargs.update({"project_id": args.project_id, "region": args.region})
+    client = get_client(args.llm_client, **client_kwargs)
 
     # Initialize workspace manager with the session-specific workspace
     workspace_manager = WorkspaceManager(

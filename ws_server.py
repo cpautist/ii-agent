@@ -99,13 +99,15 @@ async def websocket_endpoint(websocket: WebSocket):
 
     try:
         # Initialize LLM client
-        client = get_client(
-            "anthropic-direct",
-            model_name=DEFAULT_MODEL,
-            use_caching=False,
-            project_id=global_args.project_id,
-            region=global_args.region,
-        )
+        client_kwargs = {
+            "model_name": DEFAULT_MODEL,
+            "use_caching": False,
+        }
+        if global_args.llm_client == "anthropic-direct":
+            client_kwargs.update(
+                {"project_id": global_args.project_id, "region": global_args.region}
+            )
+        client = get_client(global_args.llm_client, **client_kwargs)
         
         # Initial connection message with session info
         await websocket.send_json(
