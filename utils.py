@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 import uuid
 from pathlib import Path
 from ii_agent.utils import WorkspaceManager
+from ii_agent.utils.constants import DEFAULT_MODEL
 
 
 def parse_common_args(parser: ArgumentParser):
@@ -53,6 +54,19 @@ def parse_common_args(parser: ArgumentParser):
         type=str,
         default=None,
         help="Region to use for Anthropic",
+    )
+    parser.add_argument(
+        "--llm-client",
+        type=str,
+        default="openrouter-direct",
+        choices=["anthropic-direct", "openai-direct", "openrouter-direct"],
+        help="LLM backend to use",
+    )
+    parser.add_argument(
+        "--model-name",
+        type=str,
+        default=DEFAULT_MODEL,
+        help="Model slug to use with the selected LLM client",
     )
     parser.add_argument(
         "--context-manager",

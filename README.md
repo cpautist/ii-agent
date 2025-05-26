@@ -101,7 +101,7 @@ You can view the full traces of some samples here: [GAIA Benchmark Traces](https
 
 ### Environment Variables
 
-Create a `.env` file in the root directory with the following variables:
+Create a `.env` file in the root directory with the following variables (see `.env.example` for a template):
 
 ```bash
 # Image and Video Generation Tool
@@ -120,6 +120,9 @@ STATIC_FILE_BASE_URL=http://localhost:8000/
 ANTHROPIC_API_KEY=
 #If you are using Goolge Vertex (recommended if you have permission extra throughput)
 #GOOGLE_APPLICATION_CREDENTIALS=
+#If you are using OpenRouter
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 ```
 
 ### Frontend Environment Variables
@@ -150,14 +153,15 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ### Command Line Interface
 
-If you want to use anthropic client, set `ANTHROPIC_API_KEY` in `.env` file and run:
+By default the CLI uses OpenRouter with the `openai/o4-mini` model. Ensure `OPENROUTER_API_KEY` is set in `.env` and run:
 ```bash
-python cli.py 
+python cli.py
 ```
 
-If you want to use vertex, set `GOOGLE_APPLICATION_CREDENTIALS` in `.env` file and run:
+To use Anthropic or Vertex instead:
 ```bash
-python cli.py --project-id YOUR_PROJECT_ID --region YOUR_REGION
+python cli.py --llm-client anthropic-direct
+python cli.py --project-id YOUR_PROJECT_ID --region YOUR_REGION --llm-client openai-direct
 ```
 
 Options:
@@ -166,21 +170,23 @@ Options:
 - `--workspace`: Path to the workspace directory (default: ./workspace)
 - `--needs-permission`: Require permission before executing commands
 - `--minimize-stdout-logs`: Reduce the amount of logs printed to stdout
+- `--llm-client`: LLM backend (`openrouter-direct`, `openai-direct`, `anthropic-direct`)
+- `--model-name`: Model slug to use (default `openai/o4-mini`)
 
 ### Web Interface
 
 1. Start the WebSocket server:
 
-When using Anthropic client:
+The WebSocket server also defaults to OpenRouter:
 ```bash
 export STATIC_FILE_BASE_URL=http://localhost:8000
 python ws_server.py --port 8000
 ```
 
-When using Vertex:
+To use Anthropic or Vertex instead:
 ```bash
-export STATIC_FILE_BASE_URL=http://localhost:8000
-python ws_server.py --port 8000 --project-id YOUR_PROJECT_ID --region YOUR_REGION
+python ws_server.py --port 8000 --llm-client anthropic-direct
+python ws_server.py --port 8000 --project-id YOUR_PROJECT_ID --region YOUR_REGION --llm-client openai-direct
 ```
 
 2. Start the frontend (in a separate terminal):

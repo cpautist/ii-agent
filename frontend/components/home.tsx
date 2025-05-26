@@ -32,6 +32,7 @@ import SearchBrowser from "@/components/search-browser";
 const Terminal = dynamic(() => import("@/components/terminal"), {
   ssr: false,
 });
+import ModelSelector, { MODEL_OPTIONS } from "./model-selector";
 import { Button } from "@/components/ui/button";
 import {
   ActionStep,
@@ -70,6 +71,7 @@ export default function Home() {
   );
   const [browserUrl, setBrowserUrl] = useState("");
   const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [modelName, setModelName] = useState<string>(MODEL_OPTIONS[0]);
 
   const isReplayMode = useMemo(() => !!searchParams.get("id"), [searchParams]);
 
@@ -295,6 +297,7 @@ export default function Home() {
         JSON.stringify({
           type: "init_agent",
           content: {
+            model_name: modelName,
             tool_args: {
               deep_research: isUseDeepResearch,
               pdf: true,
@@ -851,12 +854,16 @@ export default function Home() {
         <LayoutGroup>
           <AnimatePresence mode="wait">
             {!isInChatView ? (
-              <QuestionInput
-                placeholder="Give II-Agent a task to work on..."
-                value={currentQuestion}
-                setValue={setCurrentQuestion}
-                handleKeyDown={handleKeyDown}
-                handleSubmit={handleQuestionSubmit}
+              <>
+                <div className="mb-4">
+                  <ModelSelector value={modelName} onChange={setModelName} />
+                </div>
+                <QuestionInput
+                  placeholder="Give II-Agent a task to work on..."
+                  value={currentQuestion}
+                  setValue={setCurrentQuestion}
+                  handleKeyDown={handleKeyDown}
+                  handleSubmit={handleQuestionSubmit}
                 handleFileUpload={handleFileUpload}
                 isUploading={isUploading}
                 isUseDeepResearch={isUseDeepResearch}
@@ -865,6 +872,7 @@ export default function Home() {
                 isGeneratingPrompt={isGeneratingPrompt}
                 handleEnhancePrompt={handleEnhancePrompt}
               />
+              </>
             ) : (
               <motion.div
                 key="chat-view"
