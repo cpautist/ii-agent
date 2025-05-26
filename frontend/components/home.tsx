@@ -27,6 +27,7 @@ const orbitron = Orbitron({
 
 import Browser from "@/components/browser";
 import CodeEditor from "@/components/code-editor";
+import ModelSelector from "@/components/model-selector";
 import QuestionInput from "@/components/question-input";
 import SearchBrowser from "@/components/search-browser";
 const Terminal = dynamic(() => import("@/components/terminal"), {
@@ -65,6 +66,7 @@ export default function Home() {
   const [deviceId, setDeviceId] = useState<string>("");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isLoadingSession, setIsLoadingSession] = useState(false);
+  const [modelName, setModelName] = useState("google/gemini-2.5-flash-preview-05-20");
   const [filesContent, setFilesContent] = useState<{ [key: string]: string }>(
     {}
   );
@@ -295,6 +297,7 @@ export default function Home() {
         JSON.stringify({
           type: "init_agent",
           content: {
+            model_name: modelName,
             tool_args: {
               deep_research: isUseDeepResearch,
               pdf: true,
@@ -851,20 +854,25 @@ export default function Home() {
         <LayoutGroup>
           <AnimatePresence mode="wait">
             {!isInChatView ? (
-              <QuestionInput
-                placeholder="Give II-Agent a task to work on..."
-                value={currentQuestion}
-                setValue={setCurrentQuestion}
-                handleKeyDown={handleKeyDown}
-                handleSubmit={handleQuestionSubmit}
-                handleFileUpload={handleFileUpload}
-                isUploading={isUploading}
-                isUseDeepResearch={isUseDeepResearch}
-                setIsUseDeepResearch={setIsUseDeepResearch}
-                isDisabled={!socket || socket.readyState !== WebSocket.OPEN}
-                isGeneratingPrompt={isGeneratingPrompt}
-                handleEnhancePrompt={handleEnhancePrompt}
-              />
+              <>
+                <div className="mb-4 w-full flex justify-center">
+                  <ModelSelector value={modelName} onChange={setModelName} />
+                </div>
+                <QuestionInput
+                  placeholder="Give II-Agent a task to work on..."
+                  value={currentQuestion}
+                  setValue={setCurrentQuestion}
+                  handleKeyDown={handleKeyDown}
+                  handleSubmit={handleQuestionSubmit}
+                  handleFileUpload={handleFileUpload}
+                  isUploading={isUploading}
+                  isUseDeepResearch={isUseDeepResearch}
+                  setIsUseDeepResearch={setIsUseDeepResearch}
+                  isDisabled={!socket || socket.readyState !== WebSocket.OPEN}
+                  isGeneratingPrompt={isGeneratingPrompt}
+                  handleEnhancePrompt={handleEnhancePrompt}
+                />
+              </>
             ) : (
               <motion.div
                 key="chat-view"

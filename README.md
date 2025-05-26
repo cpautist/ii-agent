@@ -22,11 +22,11 @@ https://github.com/user-attachments/assets/d0eb7440-a6e2-4276-865c-a1055181bb33
 
 ## Overview
 
-II Agent is built around providing an agentic interface to Anthropic Claude models. It offers:
+II Agent is built around providing an agentic interface to OpenRouter models by default. It offers:
 
 - A CLI interface for direct command-line interaction
 - A WebSocket server that powers a modern React-based frontend
-- Integration with Google Cloud's Vertex AI for API access to Anthropic models
+- Integration with Google Cloud's Vertex AI or Anthropic API as optional backends
 
 ## Core Capabilities
 
@@ -95,7 +95,7 @@ You can view the full traces of some samples here: [GAIA Benchmark Traces](https
 
 - Python 3.10+
 - Node.js 18+ (for frontend)
-- Google Cloud project with Vertex AI API enabled or Anthropic API key
+- Google Cloud project with Vertex AI API enabled or an Anthropic API key if you want to use those backends
 
 ## Environment
 
@@ -116,9 +116,12 @@ TAVILY_API_KEY=your_tavily_key
 
 STATIC_FILE_BASE_URL=http://localhost:8000/
 
-#If you are using Anthropic client
+# Default backend is OpenRouter
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+# To use Anthropic
 ANTHROPIC_API_KEY=
-#If you are using Goolge Vertex (recommended if you have permission extra throughput)
+# If you are using Google Vertex (optional)
 #GOOGLE_APPLICATION_CREDENTIALS=
 ```
 
@@ -150,14 +153,20 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ### Command Line Interface
 
-If you want to use anthropic client, set `ANTHROPIC_API_KEY` in `.env` file and run:
+The agent defaults to OpenRouter with the Gemini Flash model:
 ```bash
-python cli.py 
+python cli.py
 ```
 
-If you want to use vertex, set `GOOGLE_APPLICATION_CREDENTIALS` in `.env` file and run:
+To use Anthropic or Vertex instead:
 ```bash
-python cli.py --project-id YOUR_PROJECT_ID --region YOUR_REGION
+python cli.py --llm-client anthropic-direct
+python cli.py --llm-client openai-direct --project-id YOUR_PROJECT_ID --region YOUR_REGION
+```
+
+You can specify a different model with `--model-name`:
+```bash
+python cli.py --model-name "openai/o4-mini"
 ```
 
 Options:
@@ -166,22 +175,25 @@ Options:
 - `--workspace`: Path to the workspace directory (default: ./workspace)
 - `--needs-permission`: Require permission before executing commands
 - `--minimize-stdout-logs`: Reduce the amount of logs printed to stdout
+- `--llm-client`: Backend to use (`openrouter-direct`, `anthropic-direct`, `openai-direct`)
+- `--model-name`: Specific model name (defaults to Gemini Flash)
 
 ### Web Interface
 
-1. Start the WebSocket server:
-
-When using Anthropic client:
+1. Start the WebSocket server (defaults to OpenRouter):
 ```bash
 export STATIC_FILE_BASE_URL=http://localhost:8000
 python ws_server.py --port 8000
 ```
 
-When using Vertex:
+To use Anthropic or Vertex instead:
 ```bash
 export STATIC_FILE_BASE_URL=http://localhost:8000
-python ws_server.py --port 8000 --project-id YOUR_PROJECT_ID --region YOUR_REGION
+python ws_server.py --port 8000 --llm-client anthropic-direct
+python ws_server.py --port 8000 --llm-client openai-direct --project-id YOUR_PROJECT_ID --region YOUR_REGION
 ```
+
+You can also change the model with `--model-name`.
 
 2. Start the frontend (in a separate terminal):
 
