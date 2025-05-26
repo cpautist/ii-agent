@@ -28,6 +28,7 @@ const orbitron = Orbitron({
 import Browser from "@/components/browser";
 import CodeEditor from "@/components/code-editor";
 import QuestionInput from "@/components/question-input";
+import ModelSelector, { MODEL_OPTIONS } from "@/components/model-selector";
 import SearchBrowser from "@/components/search-browser";
 const Terminal = dynamic(() => import("@/components/terminal"), {
   ssr: false,
@@ -70,6 +71,9 @@ export default function Home() {
   );
   const [browserUrl, setBrowserUrl] = useState("");
   const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [modelName, setModelName] = useState(
+    "google/gemini-2.5-flash-preview-05-20"
+  );
 
   const isReplayMode = useMemo(() => !!searchParams.get("id"), [searchParams]);
 
@@ -295,6 +299,7 @@ export default function Home() {
         JSON.stringify({
           type: "init_agent",
           content: {
+            model_name: modelName,
             tool_args: {
               deep_research: isUseDeepResearch,
               pdf: true,
@@ -851,20 +856,23 @@ export default function Home() {
         <LayoutGroup>
           <AnimatePresence mode="wait">
             {!isInChatView ? (
-              <QuestionInput
-                placeholder="Give II-Agent a task to work on..."
-                value={currentQuestion}
-                setValue={setCurrentQuestion}
-                handleKeyDown={handleKeyDown}
-                handleSubmit={handleQuestionSubmit}
-                handleFileUpload={handleFileUpload}
-                isUploading={isUploading}
-                isUseDeepResearch={isUseDeepResearch}
-                setIsUseDeepResearch={setIsUseDeepResearch}
-                isDisabled={!socket || socket.readyState !== WebSocket.OPEN}
-                isGeneratingPrompt={isGeneratingPrompt}
-                handleEnhancePrompt={handleEnhancePrompt}
-              />
+              <>
+                <ModelSelector model={modelName} setModel={setModelName} />
+                <QuestionInput
+                  placeholder="Give II-Agent a task to work on..."
+                  value={currentQuestion}
+                  setValue={setCurrentQuestion}
+                  handleKeyDown={handleKeyDown}
+                  handleSubmit={handleQuestionSubmit}
+                  handleFileUpload={handleFileUpload}
+                  isUploading={isUploading}
+                  isUseDeepResearch={isUseDeepResearch}
+                  setIsUseDeepResearch={setIsUseDeepResearch}
+                  isDisabled={!socket || socket.readyState !== WebSocket.OPEN}
+                  isGeneratingPrompt={isGeneratingPrompt}
+                  handleEnhancePrompt={handleEnhancePrompt}
+                />
+              </>
             ) : (
               <motion.div
                 key="chat-view"

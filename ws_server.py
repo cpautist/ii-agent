@@ -98,15 +98,6 @@ async def websocket_endpoint(websocket: WebSocket):
     print(f"Workspace manager created: {workspace_manager}")
 
     try:
-        # Initialize LLM client
-        client = get_client(
-            "anthropic-direct",
-            model_name=DEFAULT_MODEL,
-            use_caching=False,
-            project_id=global_args.project_id,
-            region=global_args.region,
-        )
-        
         # Initial connection message with session info
         await websocket.send_json(
             RealtimeEvent(
@@ -130,8 +121,16 @@ async def websocket_endpoint(websocket: WebSocket):
                 if msg_type == "init_agent":
                     # Create a new agent for this connection
                     tool_args = content.get("tool_args", {})
+                    model_name = content.get("model_name", global_args.model_name)
+                    init_client = get_client(
+                        global_args.llm_client,
+                        model_name=model_name,
+                        use_caching=False,
+                        project_id=global_args.project_id if global_args.llm_client == "anthropic-direct" else None,
+                        region=global_args.region if global_args.llm_client == "anthropic-direct" else None,
+                    )
                     agent = create_agent_for_connection(
-                        client, session_uuid, workspace_manager, websocket, tool_args
+                        init_client, session_uuid, workspace_manager, websocket, tool_args
                     )
                     active_agents[websocket] = agent
 

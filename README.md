@@ -22,11 +22,11 @@ https://github.com/user-attachments/assets/d0eb7440-a6e2-4276-865c-a1055181bb33
 
 ## Overview
 
-II Agent is built around providing an agentic interface to Anthropic Claude models. It offers:
+II Agent is built around providing an agentic interface to modern LLMs. By default it runs on OpenRouter's Gemini Flash model. It offers:
 
 - A CLI interface for direct command-line interaction
 - A WebSocket server that powers a modern React-based frontend
-- Integration with Google Cloud's Vertex AI for API access to Anthropic models
+- Integration with Google Cloud's Vertex AI for API access to Anthropic models (optional)
 
 ## Core Capabilities
 
@@ -95,7 +95,8 @@ You can view the full traces of some samples here: [GAIA Benchmark Traces](https
 
 - Python 3.10+
 - Node.js 18+ (for frontend)
-- Google Cloud project with Vertex AI API enabled or Anthropic API key
+ - OpenRouter API key (default backend)
+ - Optionally, Google Cloud project with Vertex AI API enabled or Anthropic API key
 
 ## Environment
 
@@ -120,6 +121,9 @@ STATIC_FILE_BASE_URL=http://localhost:8000/
 ANTHROPIC_API_KEY=
 #If you are using Goolge Vertex (recommended if you have permission extra throughput)
 #GOOGLE_APPLICATION_CREDENTIALS=
+#If you are using OpenRouter
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 ```
 
 ### Frontend Environment Variables
@@ -150,15 +154,20 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ### Command Line Interface
 
-If you want to use anthropic client, set `ANTHROPIC_API_KEY` in `.env` file and run:
+By default the CLI uses OpenRouter with the model `google/gemini-2.5-flash-preview-05-20`.
+Set `OPENROUTER_API_KEY` in `.env` and simply run:
 ```bash
-python cli.py 
+python cli.py
 ```
 
-If you want to use vertex, set `GOOGLE_APPLICATION_CREDENTIALS` in `.env` file and run:
+To use Anthropic or Vertex instead, provide the `--llm-client` option. For Vertex you must also set `--project-id` and `--region`:
 ```bash
-python cli.py --project-id YOUR_PROJECT_ID --region YOUR_REGION
+python cli.py --llm-client anthropic-direct
+python cli.py --llm-client openai-direct
+python cli.py --llm-client anthropic-direct --project-id YOUR_PROJECT_ID --region YOUR_REGION
 ```
+
+You can also specify a model explicitly using `--model-name`.
 
 Options:
 - `--project-id`: Google Cloud project ID
@@ -166,22 +175,27 @@ Options:
 - `--workspace`: Path to the workspace directory (default: ./workspace)
 - `--needs-permission`: Require permission before executing commands
 - `--minimize-stdout-logs`: Reduce the amount of logs printed to stdout
+- `--llm-client`: LLM backend to use (`openrouter-direct`, `anthropic-direct`, `openai-direct`)
+- `--model-name`: Model to run (default: `google/gemini-2.5-flash-preview-05-20`)
 
 ### Web Interface
 
 1. Start the WebSocket server:
 
-When using Anthropic client:
+Start the WebSocket server (defaults to OpenRouter):
 ```bash
 export STATIC_FILE_BASE_URL=http://localhost:8000
 python ws_server.py --port 8000
 ```
 
-When using Vertex:
+To use Anthropic or Vertex instead:
 ```bash
 export STATIC_FILE_BASE_URL=http://localhost:8000
-python ws_server.py --port 8000 --project-id YOUR_PROJECT_ID --region YOUR_REGION
+python ws_server.py --port 8000 --llm-client anthropic-direct
+python ws_server.py --port 8000 --llm-client anthropic-direct --project-id YOUR_PROJECT_ID --region YOUR_REGION
 ```
+
+You may specify a different model using `--model-name`.
 
 2. Start the frontend (in a separate terminal):
 
@@ -191,6 +205,8 @@ npm run dev
 ```
 
 3. Open your browser to http://localhost:3000
+
+The home page includes a dropdown to select among common OpenRouter models before starting a session.
 
 ## Project Structure
 
