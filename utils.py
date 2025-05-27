@@ -58,7 +58,7 @@ def parse_common_args(parser: ArgumentParser):
     parser.add_argument(
         "--llm-client",
         type=str,
-        default="openrouter-direct",
+        default="anthropic-direct",
         choices=["anthropic-direct", "openai-direct", "openrouter-direct"],
         help="LLM backend to use",
     )
@@ -66,7 +66,7 @@ def parse_common_args(parser: ArgumentParser):
         "--model-name",
         type=str,
         default=DEFAULT_MODEL,
-        help="Model name to use with the selected client",
+        help="Model name to use with the selected backend",
     )
     parser.add_argument(
         "--context-manager",

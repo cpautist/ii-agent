@@ -167,7 +167,10 @@ python cli.py --llm-client openai-direct
 python cli.py --llm-client anthropic-direct --project-id YOUR_PROJECT_ID --region YOUR_REGION
 ```
 
-You can also specify a model explicitly using `--model-name`.
+If you want to use OpenRouter, set `OPENROUTER_API_KEY` in `.env` and run:
+```bash
+python cli.py --llm-client openrouter-direct --model-name <MODEL_NAME>
+```
 
 Options:
 - `--project-id`: Google Cloud project ID
@@ -175,8 +178,7 @@ Options:
 - `--workspace`: Path to the workspace directory (default: ./workspace)
 - `--needs-permission`: Require permission before executing commands
 - `--minimize-stdout-logs`: Reduce the amount of logs printed to stdout
-- `--llm-client`: LLM backend to use (`openrouter-direct`, `anthropic-direct`, `openai-direct`)
-- `--model-name`: Model to run (default: `google/gemini-2.5-flash-preview-05-20`)
+- `--model-name`: Model to use with the selected backend
 
 ### Web Interface
 
@@ -195,7 +197,11 @@ python ws_server.py --port 8000 --llm-client anthropic-direct
 python ws_server.py --port 8000 --llm-client anthropic-direct --project-id YOUR_PROJECT_ID --region YOUR_REGION
 ```
 
-You may specify a different model using `--model-name`.
+When using OpenRouter:
+```bash
+export STATIC_FILE_BASE_URL=http://localhost:8000
+python ws_server.py --port 8000 --llm-client openrouter-direct --model-name <MODEL_NAME>
+```
 
 2. Start the frontend (in a separate terminal):
 
