@@ -135,7 +135,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     client_kwargs["model_name"] = model_name
                     client = get_client(global_args.llm_client, **client_kwargs)
                     agent = create_agent_for_connection(
-                        client, session_uuid, workspace_manager, websocket, tool_args
+                        init_client, session_uuid, workspace_manager, websocket, tool_args
                     )
                     active_agents[websocket] = agent
 

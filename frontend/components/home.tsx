@@ -28,6 +28,7 @@ const orbitron = Orbitron({
 import Browser from "@/components/browser";
 import CodeEditor from "@/components/code-editor";
 import QuestionInput from "@/components/question-input";
+import ModelSelector, { MODEL_OPTIONS } from "@/components/model-selector";
 import SearchBrowser from "@/components/search-browser";
 const Terminal = dynamic(() => import("@/components/terminal"), {
   ssr: false,
@@ -72,6 +73,9 @@ export default function Home() {
   );
   const [browserUrl, setBrowserUrl] = useState("");
   const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [modelName, setModelName] = useState(
+    "google/gemini-2.5-flash-preview-05-20"
+  );
 
   const isReplayMode = useMemo(() => !!searchParams.get("id"), [searchParams]);
 

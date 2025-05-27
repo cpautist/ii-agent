@@ -22,11 +22,11 @@ https://github.com/user-attachments/assets/d0eb7440-a6e2-4276-865c-a1055181bb33
 
 ## Overview
 
-II Agent is built around providing an agentic interface to Anthropic Claude models. It offers:
+II Agent is built around providing an agentic interface to modern LLMs. By default it runs on OpenRouter's Gemini Flash model. It offers:
 
 - A CLI interface for direct command-line interaction
 - A WebSocket server that powers a modern React-based frontend
-- Integration with Google Cloud's Vertex AI for API access to Anthropic models
+- Integration with Google Cloud's Vertex AI for API access to Anthropic models (optional)
 
 ## Core Capabilities
 
@@ -95,7 +95,8 @@ You can view the full traces of some samples here: [GAIA Benchmark Traces](https
 
 - Python 3.10+
 - Node.js 18+ (for frontend)
-- Google Cloud project with Vertex AI API enabled or Anthropic API key
+ - OpenRouter API key (default backend)
+ - Optionally, Google Cloud project with Vertex AI API enabled or Anthropic API key
 
 ## Environment
 
@@ -153,14 +154,17 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ### Command Line Interface
 
-If you want to use anthropic client, set `ANTHROPIC_API_KEY` in `.env` file and run:
+By default the CLI uses OpenRouter with the model `google/gemini-2.5-flash-preview-05-20`.
+Set `OPENROUTER_API_KEY` in `.env` and simply run:
 ```bash
-python cli.py 
+python cli.py
 ```
 
-If you want to use vertex, set `GOOGLE_APPLICATION_CREDENTIALS` in `.env` file and run:
+To use Anthropic or Vertex instead, provide the `--llm-client` option. For Vertex you must also set `--project-id` and `--region`:
 ```bash
-python cli.py --project-id YOUR_PROJECT_ID --region YOUR_REGION
+python cli.py --llm-client anthropic-direct
+python cli.py --llm-client openai-direct
+python cli.py --llm-client anthropic-direct --project-id YOUR_PROJECT_ID --region YOUR_REGION
 ```
 
 If you want to use OpenRouter, set `OPENROUTER_API_KEY` in `.env` and run:
@@ -180,16 +184,17 @@ Options:
 
 1. Start the WebSocket server:
 
-When using Anthropic client:
+Start the WebSocket server (defaults to OpenRouter):
 ```bash
 export STATIC_FILE_BASE_URL=http://localhost:8000
 python ws_server.py --port 8000
 ```
 
-When using Vertex:
+To use Anthropic or Vertex instead:
 ```bash
 export STATIC_FILE_BASE_URL=http://localhost:8000
-python ws_server.py --port 8000 --project-id YOUR_PROJECT_ID --region YOUR_REGION
+python ws_server.py --port 8000 --llm-client anthropic-direct
+python ws_server.py --port 8000 --llm-client anthropic-direct --project-id YOUR_PROJECT_ID --region YOUR_REGION
 ```
 
 When using OpenRouter:
@@ -206,6 +211,8 @@ npm run dev
 ```
 
 3. Open your browser to http://localhost:3000
+
+The home page includes a dropdown to select among common OpenRouter models before starting a session.
 
 ## Project Structure
 
