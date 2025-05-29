@@ -1,11 +1,18 @@
 from argparse import ArgumentParser
 import uuid
 from pathlib import Path
+import yaml
 from ii_agent.utils import WorkspaceManager
 from ii_agent.utils.constants import DEFAULT_MODEL
 
 
 def parse_common_args(parser: ArgumentParser):
+    config = {}
+    config_path = Path("agent_config.yaml")
+    if config_path.exists():
+        with open(config_path, "r") as f:
+            config = yaml.safe_load(f) or {}
+
     parser.add_argument(
         "--workspace",
         type=str,
@@ -58,14 +65,14 @@ def parse_common_args(parser: ArgumentParser):
     parser.add_argument(
         "--llm-client",
         type=str,
-        default="anthropic-direct",
+        default=config.get("llm_client", "anthropic-direct"),
         choices=["anthropic-direct", "openai-direct", "openrouter-direct"],
         help="LLM backend to use",
     )
     parser.add_argument(
         "--model-name",
         type=str,
-        default=DEFAULT_MODEL,
+        default=config.get("model_name", DEFAULT_MODEL),
         help="Model name to use with the selected backend",
     )
     parser.add_argument(
