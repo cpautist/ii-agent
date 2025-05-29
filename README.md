@@ -139,8 +139,9 @@ Create an `agent_config.yaml` file in the project root to customize the
 default model and LLM backend. If present, these settings will be used
 when running `cli.py` or `ws_server.py` without specifying the
 `--llm-client` or `--model-name` arguments. If you omit `llm_client`,
-the backend will be inferred from the model using an internal
-`model_to_provider_map`.
+the backend will be inferred from the model using the
+`MODEL_TO_PROVIDER_MAP` constant. This same inference also applies when
+providing `--model-name` on the command line without `--llm-client`.
 
 ```yaml
 llm_client: openrouter-direct
