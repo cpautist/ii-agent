@@ -18,7 +18,7 @@ def _infer_llm_client(model_name: str) -> str:
 
 def parse_common_args(parser: ArgumentParser):
     config = {}
-    config_path = Path("agent_config.yaml")
+    config_path = Path(__file__).resolve().parent / "agent_config.yaml"
     if config_path.exists():
         with open(config_path, "r") as f:
             config = yaml.safe_load(f) or {}
