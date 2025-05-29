@@ -1,11 +1,34 @@
 from argparse import ArgumentParser
 import uuid
 from pathlib import Path
+import yaml
 from ii_agent.utils import WorkspaceManager
-from ii_agent.utils.constants import DEFAULT_MODEL
+from ii_agent.utils.constants import DEFAULT_MODEL, MODEL_TO_PROVIDER_MAP
+
+
+def _infer_llm_client(model_name: str) -> str:
+    """Infer the LLM client from the model name using MODEL_TO_PROVIDER_MAP."""
+    provider = MODEL_TO_PROVIDER_MAP.get(model_name)
+    if provider == "openrouter":
+        return "openrouter-direct"
+    if provider == "openai":
+        return "openai-direct"
+    return "anthropic-direct"
 
 
 def parse_common_args(parser: ArgumentParser):
+    config = {}
+    config_path = Path("agent_config.yaml")
+    if config_path.exists():
+        with open(config_path, "r") as f:
+            config = yaml.safe_load(f) or {}
+
+    # Determine defaults for model and client. If the client is not
+    # specified in the configuration, infer it from the model name using
+    # ``MODEL_TO_PROVIDER_MAP``.
+    model_default = config.get("model_name", DEFAULT_MODEL)
+    client_default = config.get("llm_client") or _infer_llm_client(model_default)
+
     parser.add_argument(
         "--workspace",
         type=str,
@@ -58,14 +81,14 @@ def parse_common_args(parser: ArgumentParser):
     parser.add_argument(
         "--llm-client",
         type=str,
-        default="anthropic-direct",
+        default=client_default,
         choices=["anthropic-direct", "openai-direct", "openrouter-direct"],
         help="LLM backend to use",
     )
     parser.add_argument(
         "--model-name",
         type=str,
-        default=DEFAULT_MODEL,
+        default=model_default,
         help="Model name to use with the selected backend",
     )
     parser.add_argument(
