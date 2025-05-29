@@ -7,13 +7,8 @@ from ii_agent.utils.constants import DEFAULT_MODEL, MODEL_TO_PROVIDER_MAP
 
 
 def _infer_llm_client(model_name: str) -> str:
-    """Infer the LLM client from the model name using MODEL_TO_PROVIDER_MAP."""
-    provider = MODEL_TO_PROVIDER_MAP.get(model_name)
-    if provider == "openrouter":
-        return "openrouter-direct"
-    if provider == "openai":
-        return "openai-direct"
-    return "anthropic-direct"
+    """Infer the LLM client from the model name using ``MODEL_TO_PROVIDER_MAP``."""
+    return MODEL_TO_PROVIDER_MAP.get(model_name, "anthropic-direct")
 
 
 def parse_common_args(parser: ArgumentParser):
@@ -27,7 +22,7 @@ def parse_common_args(parser: ArgumentParser):
     # specified in the configuration, infer it from the model name using
     # ``MODEL_TO_PROVIDER_MAP``.
     model_default = config.get("model_name", DEFAULT_MODEL)
-    client_default = config.get("llm_client") or _infer_llm_client(model_default)
+    client_default = config.get("llm_client") or None
 
     parser.add_argument(
         "--workspace",
@@ -98,6 +93,17 @@ def parse_common_args(parser: ArgumentParser):
         choices=["file-based", "standard"],
         help="Type of context manager to use (file-based or standard)",
     )
+
+    original_parse_args = parser.parse_args
+
+    def _parse_args(*pargs, **kwargs):
+        args = original_parse_args(*pargs, **kwargs)
+        if args.llm_client is None:
+            args.llm_client = _infer_llm_client(args.model_name)
+        return args
+
+    parser.parse_args = _parse_args  # type: ignore[assignment]
+
     return parser
 
 
