@@ -133,6 +133,23 @@ For the frontend, create a `.env` file in the frontend directory:
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
+### Agent Configuration
+
+Create an `agent_config.yaml` file in the project root to customize the
+default model and LLM backend. If present, these settings will be used
+when running `cli.py` or `ws_server.py` without specifying the
+`--llm-client` or `--model-name` arguments. If you omit `llm_client`,
+the backend will be inferred from the model using an internal
+`model_to_provider_map`.
+
+```yaml
+llm_client: openrouter-direct
+model_name: mistral-7b-instruct
+```
+
+The model name will determine the provider when `llm_client` is not
+specified.
+
 ## Installation
 
 1. Clone the repository
