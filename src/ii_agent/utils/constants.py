@@ -1,6 +1,6 @@
 UPLOAD_FOLDER_NAME = "uploaded_files"
 COMPLETE_MESSAGE = "Completed the task."
-DEFAULT_MODEL = "claude-3-7-sonnet@20250219"
+DEFAULT_MODEL = "deepseek/deepseek-r1-0528:free"
 
 # Mapping of model names to the provider used to serve them. This is used
 # to automatically determine the correct LLM backend when only the model
