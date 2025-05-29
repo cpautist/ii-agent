@@ -145,7 +145,7 @@ providing `--model-name` on the command line without `--llm-client`.
 
 ```yaml
 llm_client: openrouter-direct
-model_name: mistral-7b-instruct
+model_name: deepseek/deepseek-r1-0528:free
 ```
 
 The model name will determine the provider when `llm_client` is not
