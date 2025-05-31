@@ -1,2 +1,59 @@
+# Example agent_config.yaml
+#
+# This file allows you to set default configurations for the agent,
+# such as the LLM client, model name, and provider-specific options.
+# These settings can often be overridden by command-line arguments.
+
+# llm_client: Specifies the LLM backend to use.
+# Options: "anthropic-direct", "openai-direct", "openrouter-direct"
+# If commented out or not provided, the client may be inferred from the model_name.
 llm_client: openrouter-direct
-model_name: deepseek/deepseek-r1-0528:free
+
+# model_name: Specifies the exact model string for the chosen client.
+# Make sure this model is available for the selected llm_client.
+# Example: "anthropic/claude-3.5-sonnet-20240620", "openai/gpt-4o", "deepseek/deepseek-r1-0528:free"
+model_name: "deepseek/deepseek-r1-0528:free"
+
+# provider_options: A dictionary where keys are llm_client names and
+# values are dictionaries of options specific to that provider.
+# These options are passed to the LLM client during its initialization.
+provider_options:
+  anthropic-direct:
+    # thinking_tokens: Number of tokens to allocate for "thinking" prompts (Anthropic specific).
+    # This can help the model generate intermediate thoughts before the final answer.
+    thinking_tokens: 2048
+    # project_id: Your Google Cloud Project ID (if using Anthropic via Vertex AI).
+    # region: Your Google Cloud Region (e.g., "us-east5") (if using Anthropic via Vertex AI).
+    # anthropic_api_key: Your Anthropic API key (if using direct Anthropic API).
+    # temperature: Default temperature for Anthropic models (e.g., 0.7).
+    # top_k: Default top_k for Anthropic models.
+    # top_p: Default top_p for Anthropic models.
+    # extra_body: For any other parameters specific to Anthropic client's extra_body.
+    #   custom_param: value
+
+  openai-direct:
+    # api_key: Your OpenAI API key (can also be set via OPENAI_API_KEY env var).
+    # base_url: Custom base URL for OpenAI compatible APIs (can also be set via OPENAI_BASE_URL env var).
+    # temperature: Default temperature for OpenAI models.
+    # top_p: Default top_p for OpenAI models.
+    # specific_openai_param: value # Example for other OpenAI specific params
+    passthrough_example_param: "example_value_for_openai"
+
+  openrouter-direct:
+    # openrouter_api_key: Your OpenRouter API key (can also be set via OPENROUTER_API_KEY env var).
+    # openrouter_base_url: Custom base URL for OpenRouter (can also be set via OPENROUTER_BASE_URL env var).
+    # temperature: Default temperature for models via OpenRouter.
+    # top_p: Default top_p for models via OpenRouter.
+    # default_headers: Override or add custom HTTP headers for OpenRouter requests.
+    #   X-My-Custom-Header: "custom_value"
+    # specific_openrouter_param: value # Example for other OpenRouter specific params
+    route_preference: "fastest" # Example custom option for OpenRouter
+
+# workspace: Default path to the agent's workspace directory.
+# workspace: "./my_agent_workspace"
+
+# needs_permission: If true, the agent will ask for user permission before executing tools.
+# needs_permission: true
+
+# context_manager: Type of context manager ("file-based" or "standard").
+# context_manager: "file-based"

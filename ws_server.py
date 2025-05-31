@@ -133,7 +133,12 @@ async def websocket_endpoint(websocket: WebSocket):
                     model_name = content.get("model_name", global_args.model_name)
                     tool_args = content.get("tool_args", {})
                     client_kwargs["model_name"] = model_name
-                    client = get_client(global_args.llm_client, **client_kwargs)
+                    # Pass provider_options from global_args
+                    client = get_client(
+                        client_name=global_args.llm_client,
+                        provider_options=global_args.provider_options,
+                        **client_kwargs
+                    )
                     agent = create_agent_for_connection(
                         client, session_uuid, workspace_manager, websocket, tool_args
                     )

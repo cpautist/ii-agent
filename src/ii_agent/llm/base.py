@@ -98,7 +98,7 @@ class LLMClient(ABC):
         temperature: float = 0.0,
         tools: list[ToolParam] = [],
         tool_choice: dict[str, str] | None = None,
-        thinking_tokens: int | None = None,
+        provider_options: dict[str, Any] | None = None,
     ) -> Tuple[list[AssistantContentBlock], dict[str, Any]]:
         """Generate responses.
 

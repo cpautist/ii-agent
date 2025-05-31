@@ -35,8 +35,10 @@ from ii_agent.llm.base import (
 class OpenAIDirectClient(LLMClient):
     """Use OpenAI models via first party API."""
 
-    def __init__(self, model_name: str, max_retries=2, cot_model: bool = True):
+    def __init__(self, model_name: str, max_retries=2, cot_model: bool = True, provider_options: dict | None = None):
         """Initialize the OpenAI first party client."""
+        self.provider_options = provider_options or {}
+        # TODO: Potentially use api_key and base_url from provider_options if not in env
         api_key = os.getenv("OPENAI_API_KEY", "EMPTY")
         base_url = os.getenv("OPENAI_BASE_URL", "http://0.0.0.0:2323")
         self.client = openai.OpenAI(
@@ -56,7 +58,7 @@ class OpenAIDirectClient(LLMClient):
         temperature: float = 0.0,
         tools: list[ToolParam] = [],
         tool_choice: dict[str, str] | None = None,
-        thinking_tokens: int | None = None,
+        provider_options: dict[str, Any] | None = None,
     ) -> Tuple[list[AssistantContentBlock], dict[str, Any]]:
         """Generate responses.
 
@@ -67,11 +69,16 @@ class OpenAIDirectClient(LLMClient):
             temperature: The temperature.
             tools: A list of tools.
             tool_choice: A tool choice.
+            provider_options: Provider-specific options.
 
         Returns:
             A generated response.
         """
-        assert thinking_tokens is None, "Not implemented for OpenAI"
+        # Merge instance and method provider_options
+        effective_provider_options = self.provider_options.copy()
+        if provider_options:
+            effective_provider_options.update(provider_options)
+        # TODO: Use effective_provider_options if OpenAI client needs specific params
 
         # Turn GeneralContentBlock into OpenAI message format
         openai_messages = []

@@ -1,0 +1,14 @@
+{
+  "name": "ii-agent-root",
+  "version": "1.0.0",
+  "description": "Root package for running II-Agent frontend and backend",
+  "private": true,
+  "scripts": {
+    "dev:backend": "bash ./run_backend.sh",
+    "dev:frontend": "cd frontend && yarn dev",
+    "dev": "concurrently --kill-others-on-fail --names \"BACKEND,FRONTEND\" -c \"bgBlue.bold,bgGreen.bold\" \"yarn run dev:backend\" \"yarn run dev:frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

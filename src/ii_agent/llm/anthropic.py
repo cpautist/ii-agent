@@ -62,33 +62,42 @@ class AnthropicDirectClient(LLMClient):
         model_name=DEFAULT_MODEL,
         max_retries=2,
         use_caching=True,
-        use_low_qos_server: bool = False,
-        thinking_tokens: int = 0,
-        project_id: None | str = None,
-        region: None | str = None,
+        # use_low_qos_server: bool = False, # This param seems unused
+        # thinking_tokens: int = 0, # This will be handled by provider_options
+        project_id: None | str = None, # Retained for direct Vertex init, but can be in provider_options
+        region: None | str = None, # Retained for direct Vertex init, but can be in provider_options
+        provider_options: dict | None = None,
     ):
         """Initialize the Anthropic first party client."""
-        # Disable retries since we are handling retries ourselves.
-        if (project_id is not None) and (region is not None):
+        self.provider_options = provider_options or {}
+
+        # Prioritize direct project_id/region if provided for Vertex, else check provider_options
+        effective_project_id = project_id or self.provider_options.get("project_id")
+        effective_region = region or self.provider_options.get("region")
+
+        if (effective_project_id is not None) and (effective_region is not None):
             self.client = anthropic.AnthropicVertex(
-                project_id=project_id,
-                region=region,
+                project_id=effective_project_id,
+                region=effective_region,
                 timeout=60 * 5,
-                max_retries=1,
+                max_retries=1, # Disable retries since we are handling retries ourselves.
             )
         else:
-            api_key = os.getenv("ANTHROPIC_API_KEY")
+            api_key = os.getenv("ANTHROPIC_API_KEY") or self.provider_options.get("anthropic_api_key")
+            if not api_key:
+                raise ValueError("ANTHROPIC_API_KEY not found in environment or provider_options")
             self.client = anthropic.Anthropic(
                 api_key=api_key, max_retries=1, timeout=60 * 5
             )
-            model_name = model_name.replace(
-                "@", "-"
-            )  # Quick fix for Anthropic Vertex API
+            # Quick fix for Anthropic Vertex API model name format if not using Vertex client
+            if "@" in model_name and not isinstance(self.client, anthropic.AnthropicVertex):
+                 model_name = model_name.replace("@", "-")
+
         self.model_name = model_name
         self.max_retries = max_retries
-        self.use_caching = use_caching
+        self.use_caching = use_caching # TODO: consider moving to provider_options
         self.prompt_caching_headers = {"anthropic-beta": "prompt-caching-2024-07-31"}
-        self.thinking_tokens = thinking_tokens
+        # self.thinking_tokens = thinking_tokens # Stored in self.provider_options
 
     def generate(
         self,
@@ -98,7 +107,7 @@ class AnthropicDirectClient(LLMClient):
         temperature: float = 0.0,
         tools: list[ToolParam] = [],
         tool_choice: dict[str, str] | None = None,
-        thinking_tokens: int | None = None,
+        provider_options: dict[str, Any] | None = None,
     ) -> Tuple[list[AssistantContentBlock], dict[str, Any]]:
         """Generate responses.
 
@@ -216,35 +225,58 @@ class AnthropicDirectClient(LLMClient):
 
         response = None
 
-        if thinking_tokens is None:
-            thinking_tokens = self.thinking_tokens
+        # Merge provider options: self.provider_options (instance) < method_provider_options (runtime)
+        # 'provider_options' in the method signature is the method-level override
+        effective_provider_options = self.provider_options.copy()
+        if provider_options:
+            effective_provider_options.update(provider_options)
+
+        # Extract thinking_tokens and other Anthropic specific options
+        thinking_tokens = effective_provider_options.get("thinking_tokens")
+        # Allow overriding temperature via provider_options, default to method arg
+        current_temperature = effective_provider_options.get("temperature", temperature)
+
+        anthropic_specific_params = {}
+        if "top_k" in effective_provider_options:
+            anthropic_specific_params["top_k"] = effective_provider_options["top_k"]
+        if "top_p" in effective_provider_options:
+            anthropic_specific_params["top_p"] = effective_provider_options["top_p"]
+        # Add other Anthropic specific params as needed from effective_provider_options
+
+        extra_body_parts = {}
         if thinking_tokens and thinking_tokens > 0:
-            extra_body = {
-                "thinking": {"type": "enabled", "budget_tokens": thinking_tokens}
-            }
-            temperature = 1
-            assert max_tokens >= 32_000 and thinking_tokens <= 8192, (
-                f"As a heuristic, max tokens {max_tokens} must be >= 32k and thinking tokens {thinking_tokens} must be < 8k"
-            )
-        else:
-            extra_body = None
+            extra_body_parts["thinking"] = {"type": "enabled", "budget_tokens": int(thinking_tokens)}
+            # If thinking is enabled, Anthropic typically recommends temperature=1
+            # Allow override if temperature is explicitly in effective_provider_options
+            if "temperature" not in effective_provider_options:
+                 current_temperature = 1.0
+            # Heuristic check, can be adjusted or made more dynamic
+            if max_tokens < 32000 or int(thinking_tokens) > 8192:
+                 print(f"Warning: Heuristic check: max_tokens ({max_tokens}) or thinking_tokens ({thinking_tokens}) might be suboptimal.")
+
+        # Allow any other extra_body parameters from provider_options
+        if "extra_body" in effective_provider_options and isinstance(effective_provider_options["extra_body"], dict):
+            extra_body_parts.update(effective_provider_options["extra_body"])
+
+        final_extra_body = extra_body_parts if extra_body_parts else None
 
         for retry in range(self.max_retries):
             try:
-                response = self.client.messages.create(  # type: ignore
+                response = self.client.messages.create(
                     max_tokens=max_tokens,
-                    messages=anthropic_messages,
+                    messages=anthropic_messages, # type: ignore
                     model=self.model_name,
-                    temperature=temperature,
+                    temperature=current_temperature,
                     system=system_prompt or Anthropic_NOT_GIVEN,
-                    tool_choice=tool_choice_param,  # type: ignore
-                    tools=tool_params,
+                    tool_choice=tool_choice_param,
+                    tools=tool_params, # type: ignore
                     extra_headers=extra_headers,
-                    extra_body=extra_body,
+                    extra_body=final_extra_body,
+                    **anthropic_specific_params, # Pass other anthropic specific params
                 )
                 break
             except (
-                AnthropicAPIConnectionError,
+                AnthropicAPIConnectionError, # type: ignore
                 AnthropicInternalServerError,
                 AnthropicRateLimitError,
                 AnthropicOverloadedError,

@@ -412,11 +412,21 @@ def main():
     client_kwargs = {
         "model_name": args.model_name,
         "use_caching": False,
-        "thinking_tokens": 2048,
+        # "thinking_tokens": 2048, # This should now come from provider_options
     }
+    # project_id and region are retained as direct CLI args for now,
+    # AnthropicDirectClient will prioritize them over provider_options if provided.
     if args.llm_client == "anthropic-direct":
-        client_kwargs.update({"project_id": args.project_id, "region": args.region})
-    client = get_client(args.llm_client, **client_kwargs)
+        if args.project_id:
+            client_kwargs["project_id"] = args.project_id
+        if args.region:
+            client_kwargs["region"] = args.region
+
+    client = get_client(
+        client_name=args.llm_client,
+        provider_options=args.provider_options, # Pass the loaded provider_options
+        **client_kwargs
+    )
 
     # Initialize token counter and context manager
     token_counter = TokenCounter()
