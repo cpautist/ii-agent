@@ -18,7 +18,7 @@ from ii_agent.utils.constants import COMPLETE_MESSAGE
 from ii_agent.utils.workspace_manager import WorkspaceManager
 
 
-class AnthropicFC(BaseAgent):
+class FunctionCallingAgent(BaseAgent):
     name = "general_agent"
     description = """\
 A general agent that can accomplish tasks and answer questions.
@@ -396,3 +396,7 @@ try breaking down the task into smaller steps. After call this tool to update or
         """
         self.history.clear()
         self.interrupted = False
+
+# Backwards compatibility
+AnthropicFC = FunctionCallingAgent
+
