@@ -37,7 +37,7 @@ from ii_agent.core.event import RealtimeEvent, EventType
 from ii_agent.db.models import Event
 from ii_agent.utils.constants import DEFAULT_MODEL, UPLOAD_FOLDER_NAME
 from utils import parse_common_args, create_workspace_manager_for_connection
-from ii_agent.agents.anthropic_fc import AnthropicFC
+from ii_agent.agents.fc_agent import FunctionCallingAgent
 from ii_agent.agents.base import BaseAgent
 from ii_agent.llm.base import LLMClient
 from ii_agent.utils import WorkspaceManager
@@ -424,7 +424,7 @@ def create_agent_for_connection(
         ask_user_permission=global_args.needs_permission,
         tool_args=tool_args,
     )
-    agent = AnthropicFC(
+    agent = FunctionCallingAgent(
         system_prompt=SYSTEM_PROMPT,
         client=client,
         tools=tools,
