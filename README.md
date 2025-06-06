@@ -225,6 +225,9 @@ Key settings in `agent_config.yaml`:
             # default_headers:
             #   X-My-Custom-Header: "value"
             # route_preference: "performance"
+            # fallback_models:
+            #   - openai/o3
+            #   - anthropic/claude-3.7-sonnet:beta
         ```
 
 ### `MODEL_CAPABILITIES` Constant
