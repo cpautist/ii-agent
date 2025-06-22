@@ -25,31 +25,19 @@ class ClientFactory:
         Returns:
             LLMClient: Configured LLM client instance
 
-        Raises:
-            ValueError: If the model name is not supported
         """
-        if model_name.startswith("openrouter/") or model_name.startswith("or:"):
-            # Strip the prefix that signals OpenRouter usage
-            cleaned_name = model_name.split("/", 1)[1] if "/" in model_name else model_name.split(":", 1)[1]
+        cleaned_name = model_name
+        if model_name.startswith("openrouter/"):
+            cleaned_name = model_name[len("openrouter/") :]
+        elif model_name.startswith("or:"):
+            cleaned_name = model_name[len("or:") :]
+
+        try:
             return get_client(
                 "openrouter",
                 model_name=cleaned_name,
             )
-        elif "claude" in model_name:
-            return get_client(
-                "anthropic-direct",
-                model_name=model_name,
-                use_caching=False,
-                project_id=self.project_id,
-                region=self.region,
-                thinking_tokens=kwargs.get("thinking_tokens", 0),
-            )
-        elif "gemini" in model_name:
-            return get_client(
-                "gemini-direct",
-                model_name=model_name,
-                project_id=self.project_id,
-                region=self.region,
-            )
-        else:
-            raise ValueError(f"Unknown model name: {model_name}")
+        except Exception as exc:
+            raise ValueError(
+                f"Failed to instantiate OpenRouter client for model '{model_name}': {exc}"
+            ) from exc
