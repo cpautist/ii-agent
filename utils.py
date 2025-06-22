@@ -66,8 +66,11 @@ def parse_common_args(parser: ArgumentParser):
         "--llm-client",
         type=str,
         default="anthropic-direct",
-        choices=["anthropic-direct", "openai-direct"],
-        help="LLM client to use (anthropic-direct or openai-direct for LMStudio/local)",
+        choices=["anthropic-direct", "openai-direct", "openrouter-direct"],
+        help=(
+            "LLM client to use (anthropic-direct, openai-direct for LMStudio/local, "
+            "or openrouter-direct for OpenRouter)"
+        ),
     )
     parser.add_argument(
         "--model-name",

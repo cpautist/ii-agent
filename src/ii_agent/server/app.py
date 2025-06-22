@@ -13,11 +13,12 @@ from ii_agent.core.config.utils import load_ii_agent_config
 logger = logging.getLogger(__name__)
 
 
-def create_app(args) -> FastAPI:
+def create_app(args, client_kwargs: dict | None = None) -> FastAPI:
     """Create and configure the FastAPI application.
 
     Args:
         args: Configuration arguments
+        client_kwargs: Optional keyword arguments for the LLM client
 
     Returns:
         FastAPI: Configured FastAPI application instance
@@ -36,6 +37,7 @@ def create_app(args) -> FastAPI:
 
     # Store global args in app state for access in endpoints
     app.state.workspace = args.workspace
+    app.state.client_kwargs = client_kwargs or {}
 
     # Create factory instances
     client_factory = ClientFactory(project_id=args.project_id, region=args.region)

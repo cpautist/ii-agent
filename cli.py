@@ -100,6 +100,8 @@ async def async_main():
     elif args.llm_client == "openai-direct":
         client_kwargs["azure_model"] = args.azure_model
         client_kwargs["cot_model"] = args.cot_model
+    elif args.llm_client == "openrouter-direct":
+        client_kwargs["cot_model"] = args.cot_model
 
     client = get_client(args.llm_client, **client_kwargs)
 
