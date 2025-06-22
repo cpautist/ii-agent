@@ -33,6 +33,7 @@ II Agent is built around providing an agentic interface to leading language mode
 - A CLI interface for direct command-line interaction
 - A WebSocket server that powers a modern React-based frontend
 - Integration with multiple LLM providers:
+  - OpenRouter models (OpenAI-compatible API)
   - Anthropic Claude models (direct API or via Google Cloud Vertex AI)
   - Google Gemini models (direct API or via Google Cloud Vertex AI)
 
@@ -56,8 +57,9 @@ You can view the full traces of some samples here: [GAIA Benchmark Traces](https
 - Python 3.10+
 - Node.js 18+ (for frontend)
 - At least one of the following:
+  - OpenRouter API key, or
   - Anthropic API key, or
-  - Google Gemini API key, or  
+  - Google Gemini API key, or
   - Google Cloud project with Vertex AI API enabled
 
 > \[!TIP]
@@ -139,23 +141,26 @@ detect and use `OpenRouterClient`. Example:
 
 1. Clone the repository
 2. Set up the 2 environment files as mentioned in the above step
-3. If you are using Anthropic Client run
+3. With OpenRouter (default):
 ```
 chmod +x start.sh stop.sh
-./start.sh 
+LLM_CLIENT=openrouter-direct \
+MODEL_NAME=openai/gpt-4.1 \
+OPENROUTER_API_KEY=your_openrouter_key \
+./start.sh
+```
+If you are using Anthropic Client run
+```
+chmod +x start.sh stop.sh
+LLM_CLIENT=anthropic-direct \
+MODEL_NAME=claude-sonnet-4@20250514 \
+./start.sh
 ```
 If you are using Vertex, run with these variables
 ```
 GOOGLE_APPLICATION_CREDENTIALS=absolute-path-to-credential \
 PROJECT_ID=project-id \
 REGION=region \
-./start.sh
-```
-If you are using OpenRouter, run with these variables
-```
-LLM_CLIENT=openrouter-direct \
-MODEL_NAME=openrouter/meta-llama/llama-3-70b-instruct \
-OPENROUTER_API_KEY=your_openrouter_key \
 ./start.sh
 ```
 *Note: Due to a bug in the latest docker, if you receive and error, try running with `--force-recreate`. For example `./start.sh --force-recreate `*
@@ -181,19 +186,20 @@ Run `./stop.sh` to tear down the service.
 
 ### Command Line Interface
 
-If you want to use anthropic client, set `ANTHROPIC_API_KEY` in `.env` file and run:
+By default the CLI uses OpenRouter. Set `OPENROUTER_API_KEY` and optionally `OPENROUTER_BASE_URL` in `.env` then run:
 ```bash
-python cli.py 
+python cli.py
 ```
 
-If you want to use vertex, set `GOOGLE_APPLICATION_CREDENTIALS` and run:
+To use the Anthropic client instead, set `ANTHROPIC_API_KEY` and run:
 ```bash
-GOOGLE_APPLICATION_CREDENTIALS=path-to-your-credential
-python cli.py --project-id YOUR_PROJECT_ID --region YOUR_REGION
+python cli.py --llm-client anthropic-direct --model-name claude-sonnet-4@20250514
 ```
-If you want to use OpenRouter, set `OPENROUTER_API_KEY` and optionally `OPENROUTER_BASE_URL` in `.env` and run:
+
+If you want to use Vertex, run with:
 ```bash
-python cli.py --llm-client openrouter-direct --model-name openrouter/meta-llama/llama-3-70b-instruct
+GOOGLE_APPLICATION_CREDENTIALS=path-to-your-credential \
+python cli.py --llm-client anthropic-direct --project-id YOUR_PROJECT_ID --region YOUR_REGION
 ```
 
 
@@ -206,22 +212,20 @@ Options:
 
 ### Web Interface
 
-1. Start the WebSocket server:
-
-When using Anthropic client:
+1. Start the WebSocket server using OpenRouter (default):
 ```bash
 python ws_server.py --port 8000
 ```
 
-When using OpenRouter:
+To use Anthropic instead:
 ```bash
-python ws_server.py --port 8000 --llm-client openrouter-direct --model-name openrouter/meta-llama/llama-3-70b-instruct
+python ws_server.py --port 8000 --llm-client anthropic-direct --model-name claude-sonnet-4@20250514
 ```
 
-When using Vertex:
+To run with Vertex:
 ```bash
 GOOGLE_APPLICATION_CREDENTIALS=path-to-your-credential \
-python ws_server.py --port 8000 --project-id YOUR_PROJECT_ID --region YOUR_REGION
+python ws_server.py --port 8000 --llm-client anthropic-direct --project-id YOUR_PROJECT_ID --region YOUR_REGION
 ```
 
 2. Start the frontend (in a separate terminal):
