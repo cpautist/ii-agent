@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 import uuid
 from pathlib import Path
 from ii_agent.utils import WorkspaceManager
-from ii_agent.utils.constants import DEFAULT_MODEL
+
 
 
 def parse_common_args(parser: ArgumentParser):
@@ -65,18 +65,18 @@ def parse_common_args(parser: ArgumentParser):
     parser.add_argument(
         "--llm-client",
         type=str,
-        default="anthropic-direct",
-        choices=["anthropic-direct", "openai-direct", "openrouter-direct"],
+        default="openrouter-direct",
+        choices=["openrouter-direct", "openai-direct", "anthropic-direct"],
         help=(
-            "LLM client to use (anthropic-direct, openai-direct for LMStudio/local, "
-            "or openrouter-direct for OpenRouter)"
+            "LLM client to use (openrouter-direct for OpenRouter, openai-direct for LMStudio/local, "
+            "or anthropic-direct for Anthropic)"
         ),
     )
     parser.add_argument(
         "--model-name",
         type=str,
-        default=DEFAULT_MODEL,
-        help="Name of the LLM model to use (e.g., claude-3-opus-20240229 or local-model-identifier for LMStudio)",
+        default="openai/gpt-4.1",
+        help="Name of the LLM model to use (e.g., openai/gpt-4.1)",
     )
     parser.add_argument(
         "--azure-model",
