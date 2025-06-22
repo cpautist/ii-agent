@@ -151,6 +151,13 @@ PROJECT_ID=project-id \
 REGION=region \
 ./start.sh
 ```
+If you are using OpenRouter, run with these variables
+```
+LLM_CLIENT=openrouter-direct \
+MODEL_NAME=openrouter/meta-llama/llama-3-70b-instruct \
+OPENROUTER_API_KEY=your_openrouter_key \
+./start.sh
+```
 *Note: Due to a bug in the latest docker, if you receive and error, try running with `--force-recreate`. For example `./start.sh --force-recreate `*
 
 After running start.sh, you can check your application at: localhost:3000
