@@ -11,7 +11,7 @@ def get_client(client_name: str, **kwargs) -> LLMClient:
         return AnthropicDirectClient(**kwargs)
     elif client_name == "openai-direct":
         return OpenAIDirectClient(**kwargs)
-    elif client_name == "openrouter":
+    elif client_name in ["openrouter", "openrouter-direct"]:
         return OpenRouterClient(**kwargs)
     elif client_name == "gemini-direct":
         return GeminiDirectClient(**kwargs)

@@ -29,8 +29,22 @@ def main():
     )
     args = parser.parse_args()
 
+    # Build client-specific kwargs for default settings
+    client_kwargs = {
+        "model_name": args.model_name,
+    }
+    if args.llm_client == "anthropic-direct":
+        client_kwargs["use_caching"] = False
+        client_kwargs["project_id"] = args.project_id
+        client_kwargs["region"] = args.region
+    elif args.llm_client == "openai-direct":
+        client_kwargs["azure_model"] = args.azure_model
+        client_kwargs["cot_model"] = args.cot_model
+    elif args.llm_client == "openrouter-direct":
+        client_kwargs["cot_model"] = args.cot_model
+
     # Create the FastAPI app
-    app = create_app(args)
+    app = create_app(args, client_kwargs)
 
     # Start the FastAPI server
     logger.info(f"Starting WebSocket server on {args.host}:{args.port}")
