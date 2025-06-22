@@ -26,6 +26,8 @@ services:
       - PROJECT_ID=${PROJECT_ID}
       - REGION=${REGION}
       - WORKSPACE_PATH=${WORKSPACE_PATH}
+      - LLM_CLIENT=${LLM_CLIENT:-anthropic-direct}
+      - MODEL_NAME=${MODEL_NAME:-claude-sonnet-4@20250514}
     volumes:
       - ${WORKSPACE_PATH:-../workspace}:/app/workspace
       #If file doesn't exist, use a dummy file
