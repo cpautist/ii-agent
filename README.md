@@ -141,31 +141,32 @@ detect and use `OpenRouterClient`. Example:
 
 1. Clone the repository
 2. Set up the 2 environment files as mentioned in the above step
+**Windows users can launch the application using `start.ps1` in PowerShell.**
 3. With OpenRouter (default):
 ```
 chmod +x start.sh stop.sh
 LLM_CLIENT=openrouter-direct \
 MODEL_NAME=openai/gpt-4.1 \
 OPENROUTER_API_KEY=your_openrouter_key \
-./start.sh
+./start.sh   # On Windows: .\start.ps1
 ```
 If you are using Anthropic Client run
 ```
 chmod +x start.sh stop.sh
 LLM_CLIENT=anthropic-direct \
 MODEL_NAME=claude-sonnet-4@20250514 \
-./start.sh
+./start.sh   # On Windows: .\start.ps1
 ```
 If you are using Vertex, run with these variables
 ```
 GOOGLE_APPLICATION_CREDENTIALS=absolute-path-to-credential \
 PROJECT_ID=project-id \
 REGION=region \
-./start.sh
+./start.sh   # On Windows: .\start.ps1
 ```
 *Note: Due to a bug in the latest docker, if you receive and error, try running with `--force-recreate`. For example `./start.sh --force-recreate `*
 
-After running start.sh, you can check your application at: localhost:3000
+After running start.sh (or start.ps1 on Windows), you can check your application at: localhost:3000
 
 Run `./stop.sh` to tear down the service.
 
