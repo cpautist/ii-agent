@@ -28,7 +28,14 @@ class ClientFactory:
         Raises:
             ValueError: If the model name is not supported
         """
-        if "claude" in model_name:
+        if model_name.startswith("openrouter/") or model_name.startswith("or:"):
+            # Strip the prefix that signals OpenRouter usage
+            cleaned_name = model_name.split("/", 1)[1] if "/" in model_name else model_name.split(":", 1)[1]
+            return get_client(
+                "openrouter",
+                model_name=cleaned_name,
+            )
+        elif "claude" in model_name:
             return get_client(
                 "anthropic-direct",
                 model_name=model_name,
