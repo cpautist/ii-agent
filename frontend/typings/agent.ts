@@ -10,6 +10,10 @@ export const AVAILABLE_MODELS = [
   "claude-3-7-sonnet@20250219",
   "gemini-2.5-pro-preview-05-06",
   "gpt-4.1",
+  "openrouter/meta-llama/llama-3-70b-instruct",
+  "openrouter/mistralai/mixtral-8x7b-32768",
+  "openrouter/01-ai/yi-34b-chat",
+  "openrouter/nousresearch/nous-hermes-2-mixtral-8x7b-dpo",
 ];
 
 export enum WebSocketConnectionState {

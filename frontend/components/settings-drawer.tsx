@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Input } from "./ui/input";
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
 import { AVAILABLE_MODELS, ToolSettings } from "@/typings/agent";
 import { useAppContext } from "@/context/app-context";
@@ -26,12 +27,14 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
   const { state, dispatch } = useAppContext();
   const [toolsExpanded, setToolsExpanded] = useState(true);
   const [reasoningExpanded, setReasoningExpanded] = useState(true);
+  const [customModel, setCustomModel] = useState("");
 
   // Get selected model from cookies on init
   useEffect(() => {
     const savedModel = Cookies.get("selected_model");
-    if (savedModel && AVAILABLE_MODELS.includes(savedModel)) {
+    if (savedModel) {
       dispatch({ type: "SET_SELECTED_MODEL", payload: savedModel });
+      setCustomModel(savedModel);
     }
   }, [dispatch]);
 
@@ -63,6 +66,7 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
       },
     });
     dispatch({ type: "SET_SELECTED_MODEL", payload: AVAILABLE_MODELS[0] });
+    setCustomModel(AVAILABLE_MODELS[0]);
   };
 
   const handleReasoningEffortChange = (effort: string) => {
@@ -82,6 +86,7 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
         sameSite: "strict",
         secure: window.location.protocol === "https:",
       });
+      setCustomModel(state.selectedModel);
 
       // Reset thinking_tokens to 0 for non-Claude models
       if (!isClaudeModel && state.toolSettings.thinking_tokens > 0) {
@@ -138,23 +143,39 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
             {/* Model selector */}
             <div className="space-y-2">
               <Select
-                value={state.selectedModel}
+                value={
+                  AVAILABLE_MODELS.includes(state.selectedModel ?? "")
+                    ? state.selectedModel
+                    : ""
+                }
                 onValueChange={(model) =>
                   dispatch({ type: "SET_SELECTED_MODEL", payload: model })
                 }
               >
-                <SelectTrigger className="w-full bg-[#35363a] border-[#ffffff0f]">
-                  <SelectValue placeholder="Select model" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#35363a] border-[#ffffff0f]">
-                  {AVAILABLE_MODELS.map((model) => (
-                    <SelectItem key={model} value={model}>
-                      {model}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <SelectTrigger className="w-full bg-[#35363a] border-[#ffffff0f]">
+                <SelectValue placeholder="Select model" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#35363a] border-[#ffffff0f]">
+                {AVAILABLE_MODELS.map((model) => (
+                  <SelectItem key={model} value={model}>
+                    {model}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input
+              placeholder="Custom model..."
+              className="bg-[#35363a] border-[#ffffff0f]"
+              value={customModel}
+              onChange={(e) => {
+                setCustomModel(e.target.value);
+                dispatch({
+                  type: "SET_SELECTED_MODEL",
+                  payload: e.target.value,
+                });
+              }}
+            />
+          </div>
 
             {/* Reasoning Effort section - only for Claude models */}
             {isClaudeModel && (
