@@ -5,15 +5,27 @@ export enum TAB {
 }
 
 export const AVAILABLE_MODELS = [
-  "claude-sonnet-4@20250514",
-  "claude-opus-4@20250514",
-  "claude-3-7-sonnet@20250219",
-  "gemini-2.5-pro-preview-05-06",
-  "gpt-4.1",
-  "openrouter/meta-llama/llama-3-70b-instruct",
-  "openrouter/mistralai/mixtral-8x7b-32768",
-  "openrouter/01-ai/yi-34b-chat",
-  "openrouter/nousresearch/nous-hermes-2-mixtral-8x7b-dpo",
+  "anthropic/claude-sonnet-4",
+  "google/gemini-2.5-flash-preview-05-20",
+  "deepseek/deepseek-chat-v3-0324:free",
+  "deepseek/deepseek-chat-v3-0324",
+  "google/gemini-2.5-pro-preview",
+  "deepseek/deepseek-r1-0528:free",
+  "deepseek/deepseek-r1-0528",
+  "openai/gpt-4.1",
+  "openai/gpt-4.1-mini",
+  "openai/gpt-4.1-nano",
+  "openai/o4-mini",
+  "openai/o4-mini-high",
+  "openai/o3",
+  "meta-llama/llama-4-maverick",
+  "meta-llama/llama-4-maverick:free",
+  "google/gemini-2.5-flash-lite-preview-06-17",
+  "google/gemini-2.5-flash",
+  "google/gemini-2.5-flash-preview-05-20:thinking",
+  "x-ai/grok-3-mini-beta",
+  "x-ai/grok-3-mini",
+  "anthropic/claude-opus-4",
 ];
 
 export enum WebSocketConnectionState {
