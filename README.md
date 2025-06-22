@@ -184,6 +184,11 @@ If you want to use vertex, set `GOOGLE_APPLICATION_CREDENTIALS` and run:
 GOOGLE_APPLICATION_CREDENTIALS=path-to-your-credential
 python cli.py --project-id YOUR_PROJECT_ID --region YOUR_REGION
 ```
+If you want to use OpenRouter, set `OPENROUTER_API_KEY` and optionally `OPENROUTER_BASE_URL` in `.env` and run:
+```bash
+python cli.py --llm-client openrouter-direct --model-name openrouter/meta-llama/llama-3-70b-instruct
+```
+
 
 Options:
 - `--project-id`: Google Cloud project ID
@@ -199,6 +204,11 @@ Options:
 When using Anthropic client:
 ```bash
 python ws_server.py --port 8000
+```
+
+When using OpenRouter:
+```bash
+python ws_server.py --port 8000 --llm-client openrouter-direct --model-name openrouter/meta-llama/llama-3-70b-instruct
 ```
 
 When using Vertex:
