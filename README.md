@@ -209,6 +209,8 @@ Options:
 - `--workspace`: Path to the workspace directory (default: ./workspace)
 - `--needs-permission`: Require permission before executing commands
 - `--minimize-stdout-logs`: Reduce the amount of logs printed to stdout
+- `--shell-path`: Path to the shell executable used by the bash tool. Defaults
+  to `/bin/bash` on Unix systems and `powershell` on Windows.
 
 ### Web Interface
 

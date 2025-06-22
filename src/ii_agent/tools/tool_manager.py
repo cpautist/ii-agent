@@ -63,6 +63,7 @@ def get_system_tools(
     container_id: Optional[str] = None,
     ask_user_permission: bool = False,
     tool_args: Dict[str, Any] = None,
+    shell_path: Optional[str] = None,
 ) -> list[LLMTool]:
     """
     Retrieves a list of all system tools.
@@ -72,11 +73,15 @@ def get_system_tools(
     """
     if container_id is not None:
         bash_tool = create_docker_bash_tool(
-            container=container_id, ask_user_permission=ask_user_permission
+            container=container_id,
+            ask_user_permission=ask_user_permission,
+            shell_path=shell_path,
         )
     else:
         bash_tool = create_bash_tool(
-            ask_user_permission=ask_user_permission, cwd=workspace_manager.root
+            ask_user_permission=ask_user_permission,
+            cwd=workspace_manager.root,
+            shell_path=shell_path,
         )
 
     logger = logging.getLogger("presentation_context_manager")
