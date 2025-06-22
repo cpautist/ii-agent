@@ -2,6 +2,8 @@ from ii_agent.llm.base import LLMClient
 from ii_agent.llm.openai import OpenAIDirectClient
 from ii_agent.llm.anthropic import AnthropicDirectClient
 from ii_agent.llm.gemini import GeminiDirectClient
+from ii_agent.llm.openrouter import OpenRouterClient
+
 
 def get_client(client_name: str, **kwargs) -> LLMClient:
     """Get a client for a given client name."""
@@ -9,6 +11,8 @@ def get_client(client_name: str, **kwargs) -> LLMClient:
         return AnthropicDirectClient(**kwargs)
     elif client_name == "openai-direct":
         return OpenAIDirectClient(**kwargs)
+    elif client_name == "openrouter":
+        return OpenRouterClient(**kwargs)
     elif client_name == "gemini-direct":
         return GeminiDirectClient(**kwargs)
     else:
@@ -19,6 +23,7 @@ __all__ = [
     "LLMClient",
     "OpenAIDirectClient",
     "AnthropicDirectClient",
+    "OpenRouterClient",
     "GeminiDirectClient",
     "get_client",
 ]
