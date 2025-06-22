@@ -11,6 +11,7 @@ It also supports command filters for transforming commands before execution.
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import os
 import pexpect
 import re
 from abc import ABC, abstractmethod
@@ -19,9 +20,21 @@ from ii_agent.llm.message_history import MessageHistory
 from ii_agent.tools.base import LLMTool, ToolImplOutput
 
 
-def start_persistent_shell(timeout: int):
-    # Start a new Bash shell
-    child = pexpect.spawn("/bin/bash", encoding="utf-8", echo=False, timeout=timeout)
+def start_persistent_shell(timeout: int, shell_path: Optional[str] = None):
+    """Start a persistent shell process.
+
+    Args:
+        timeout: pexpect timeout for spawned shell
+        shell_path: Path of the shell executable. If ``None`` a platform
+            appropriate default will be chosen (``powershell`` on Windows,
+            ``/bin/bash`` otherwise).
+    """
+
+    if shell_path is None:
+        shell_path = "powershell" if os.name == "nt" else "/bin/bash"
+
+    # Start a new shell
+    child = pexpect.spawn(shell_path, encoding="utf-8", echo=False, timeout=timeout)
     # Set a known, unique prompt
     # We use a random string that is unlikely to appear otherwise
     # so we can detect the prompt reliably.
@@ -200,6 +213,7 @@ Run commands in a bash shell
         command_filters: Optional[List[CommandFilter]] = None,
         timeout: int = 60,
         additional_banned_command_strs: Optional[List[str]] = None,
+        shell_path: Optional[str] = None,
     ):
         """Initialize the BashTool.
 
@@ -207,12 +221,15 @@ Run commands in a bash shell
             workspace_root: Root directory of the workspace
             require_confirmation: Whether to require user confirmation before executing commands
             command_filters: Optional list of command filters to apply before execution
+            shell_path: Path to the shell executable. If not provided, a platform
+                specific default will be used.
         """
         super().__init__()
         self.workspace_root = workspace_root
         self.require_confirmation = require_confirmation
         self.command_filters = command_filters or []
         self.timeout = timeout
+        self.shell_path = shell_path
 
         self.banned_command_strs = [
             "git init",
@@ -222,7 +239,9 @@ Run commands in a bash shell
         if additional_banned_command_strs is not None:
             self.banned_command_strs.extend(additional_banned_command_strs)
 
-        self.child, self.custom_prompt = start_persistent_shell(timeout=timeout)
+        self.child, self.custom_prompt = start_persistent_shell(
+            timeout=timeout, shell_path=self.shell_path
+        )
         if self.workspace_root:
             run_command(self.child, self.custom_prompt, f"cd {self.workspace_root}")
 
@@ -301,7 +320,9 @@ Run commands in a bash shell
             echo_result = run_command(self.child, self.custom_prompt, "echo hello")
             assert echo_result.strip() == "hello"
         except Exception:
-            self.child, self.custom_prompt = start_persistent_shell(self.timeout)
+            self.child, self.custom_prompt = start_persistent_shell(
+                self.timeout, shell_path=self.shell_path
+            )
 
         # Execute the command and capture output
         try:
@@ -347,6 +368,7 @@ def create_bash_tool(
     cwd: Optional[Path] = None,
     command_filters: Optional[List[CommandFilter]] = None,
     additional_banned_command_strs: Optional[List[str]] = None,
+    shell_path: Optional[str] = None,
 ) -> BashTool:
     """Create a bash tool for executing bash commands.
 
@@ -363,6 +385,7 @@ def create_bash_tool(
         require_confirmation=ask_user_permission,
         command_filters=command_filters,
         additional_banned_command_strs=additional_banned_command_strs,
+        shell_path=shell_path,
     )
 
 
@@ -373,6 +396,7 @@ def create_ssh_bash_tool(
     identity_file: Optional[Path] = None,
     ask_user_permission: bool = True,
     cwd: Optional[Path] = None,
+    shell_path: Optional[str] = None,
 ) -> BashTool:
     """Create a bash tool that executes commands over SSH.
 
@@ -398,6 +422,7 @@ def create_ssh_bash_tool(
         ask_user_permission=ask_user_permission,
         cwd=cwd,
         command_filters=[ssh_filter],
+        shell_path=shell_path,
     )
 
 
@@ -407,6 +432,7 @@ def create_docker_bash_tool(
     ask_user_permission: bool = True,
     cwd: Optional[Path] = None,
     additional_banned_command_strs: Optional[List[str]] = None,
+    shell_path: Optional[str] = None,
 ) -> BashTool:
     """Create a bash tool that executes commands in a Docker container.
 
@@ -429,4 +455,5 @@ def create_docker_bash_tool(
         cwd=cwd,
         command_filters=[docker_filter],
         additional_banned_command_strs=additional_banned_command_strs,
+        shell_path=shell_path,
     )

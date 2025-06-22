@@ -129,6 +129,7 @@ async def async_main():
         message_queue=queue,
         container_id=args.docker_container_id,
         ask_user_permission=args.needs_permission,
+        shell_path=args.shell_path,
         tool_args={
             "deep_research": False,
             "pdf": True,

@@ -276,7 +276,11 @@ async def answer_single_question(
         StrReplaceEditorTool(
             workspace_manager=workspace_manager, message_queue=message_queue
         ),
-        BashTool(workspace_root=workspace_path, require_confirmation=False),
+        BashTool(
+            workspace_root=workspace_path,
+            require_confirmation=False,
+            shell_path=args.shell_path,
+        ),
         BrowserNavigationTool(browser=browser),
         BrowserRestartTool(browser=browser),
         BrowserScrollDownTool(browser=browser),

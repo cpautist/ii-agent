@@ -4,6 +4,7 @@ This module contains tests for the core functionality of BashTool,
 including command execution, error handling, and integration with command filters.
 """
 
+import os
 import pytest
 from pathlib import Path
 import unittest
@@ -400,6 +401,7 @@ class BashToolTest(unittest.IsolatedAsyncioTestCase):
             _ = create_bash_tool(
                 ask_user_permission=True,
                 cwd=self.workspace_root,
+                shell_path="/bin/zsh",
             )
 
             # Check that BashTool was created with correct parameters
@@ -408,6 +410,7 @@ class BashToolTest(unittest.IsolatedAsyncioTestCase):
                 require_confirmation=True,
                 command_filters=None,
                 additional_banned_command_strs=None,
+                shell_path="/bin/zsh",
             )
 
 
@@ -447,9 +450,11 @@ class StartPersistentShellTest(unittest.TestCase):
         # Call start_persistent_shell
         child, prompt = start_persistent_shell(timeout=60)
 
-        # Check that spawn was called with bash
+        expected_shell = "powershell" if os.name == "nt" else "/bin/bash"
+
+        # Check that spawn was called with correct shell
         mock_spawn.assert_called_once_with(
-            "/bin/bash", encoding="utf-8", echo=False, timeout=60
+            expected_shell, encoding="utf-8", echo=False, timeout=60
         )
 
         # Check that we set up the prompt
@@ -463,6 +468,18 @@ class StartPersistentShellTest(unittest.TestCase):
 
         # Check that we waited for the prompt
         mock_child.expect.assert_called_once()
+
+    @patch("ii_agent.tools.bash_tool.pexpect.spawn")
+    def test_start_persistent_shell_custom_shell(self, mock_spawn):
+        """Ensure provided shell_path is used."""
+        mock_child = MagicMock()
+        mock_spawn.return_value = mock_child
+
+        child, prompt = start_persistent_shell(timeout=60, shell_path="/bin/zsh")
+
+        mock_spawn.assert_called_once_with("/bin/zsh", encoding="utf-8", echo=False, timeout=60)
+        self.assertEqual(child, mock_child)
+        self.assertTrue(isinstance(prompt, str))
 
 
 @pytest.mark.asyncio

@@ -47,6 +47,7 @@ def create_app(args, client_kwargs: dict | None = None) -> FastAPI:
         minimize_stdout_logs=args.minimize_stdout_logs,
         docker_container_id=args.docker_container_id,
         needs_permission=args.needs_permission,
+        shell_path=args.shell_path,
     )
     agent_factory = AgentFactory(agent_config)
 

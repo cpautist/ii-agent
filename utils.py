@@ -38,6 +38,14 @@ def parse_common_args(parser: ArgumentParser):
         help="(Optional) Docker container ID to run commands in.",
     )
     parser.add_argument(
+        "--shell-path",
+        type=str,
+        default=None,
+        help=(
+            "Path to shell executable (defaults to powershell on Windows or /bin/bash on Unix)"
+        ),
+    )
+    parser.add_argument(
         "--minimize-stdout-logs",
         help="Minimize the amount of logs printed to stdout.",
         action="store_true",

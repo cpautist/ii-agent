@@ -33,6 +33,7 @@ class AgentConfig:
         minimize_stdout_logs: bool = False,
         docker_container_id: str = None,
         needs_permission: bool = True,
+        shell_path: str | None = None,
         max_output_tokens_per_turn: int = MAX_OUTPUT_TOKENS_PER_TURN,
         max_turns: int = MAX_TURNS,
         token_budget: int = TOKEN_BUDGET,
@@ -41,6 +42,7 @@ class AgentConfig:
         self.minimize_stdout_logs = minimize_stdout_logs
         self.docker_container_id = docker_container_id
         self.needs_permission = needs_permission
+        self.shell_path = shell_path
         self.max_output_tokens_per_turn = max_output_tokens_per_turn
         self.max_turns = max_turns
         self.token_budget = token_budget
@@ -176,6 +178,7 @@ class AgentFactory:
             container_id=self.config.docker_container_id,
             ask_user_permission=self.config.needs_permission,
             tool_args=tool_args,
+            shell_path=self.config.shell_path,
         )
 
         # Choose system prompt based on tool args
