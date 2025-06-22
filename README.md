@@ -94,6 +94,10 @@ GEMINI_API_KEY=your_gemini_key
 # Option 3: For OpenAI models
 OPENAI_API_KEY=your_openai_key
 
+# Option 4: For OpenRouter models
+OPENROUTER_API_KEY=your_openrouter_key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+
 # Search Provider API Key
 TAVILY_API_KEY=your_tavily_key
 
@@ -116,7 +120,16 @@ MEDIA_GCP_LOCATION=your_vertex_location
 
 Image Search Tool  (Optional, good for more beautiful output)
 ```
-SERPAPI_API_KEY=your_serpapi_key 
+SERPAPI_API_KEY=your_serpapi_key
+```
+
+### OpenRouter Model Names
+
+Prefix model identifiers with `openrouter/` or `or:` so the client factory can
+detect and use `OpenRouterClient`. Example:
+
+```bash
+--model-name openrouter/meta-llama/llama-3-70b-instruct
 ```
 
 
