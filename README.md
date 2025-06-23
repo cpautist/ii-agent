@@ -86,25 +86,24 @@ For the backend, create a `.env` file in the root directory with the following v
 
 
 ```bash
-# Required API Keys - Choose one based on your LLM provider:
-# Option 1: For Claude models via Anthropic
-ANTHROPIC_API_KEY=your_anthropic_key
-
-# Option 2: For Gemini models via Google
-GEMINI_API_KEY=your_gemini_key
-
-# Option 3: For OpenAI models
-OPENAI_API_KEY=your_openai_key
-
-# Option 4: For OpenRouter models
+# Primary LLM configuration
 OPENROUTER_API_KEY=your_openrouter_key
+# Optional if using a custom endpoint
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+
+# Legacy provider keys (optional, for compatibility only)
+# ANTHROPIC_API_KEY=your_anthropic_key
+# GEMINI_API_KEY=your_gemini_key
+# OPENAI_API_KEY=your_openai_key
 
 # Search Provider API Key
 TAVILY_API_KEY=your_tavily_key
 
 STATIC_FILE_BASE_URL=http://localhost:8000/
 ```
+
+Windows users can run `./start.ps1` from PowerShell. When using CLI tools,
+pass `--shell-path powershell` so shell commands execute correctly.
 
 We also support other search and crawl provider such as FireCrawl and SerpAPI (Optional but yield better performance):
 ```bash
@@ -148,6 +147,7 @@ LLM_CLIENT=openrouter-direct \
 MODEL_NAME=openai/gpt-4.1 \
 OPENROUTER_API_KEY=your_openrouter_key \
 ./start.sh
+# On Windows use ./start.ps1 instead of ./start.sh
 ```
 If you are using Anthropic Client run
 ```
@@ -155,6 +155,7 @@ chmod +x start.sh stop.sh
 LLM_CLIENT=anthropic-direct \
 MODEL_NAME=claude-sonnet-4@20250514 \
 ./start.sh
+# On Windows use ./start.ps1 instead of ./start.sh
 ```
 If you are using Vertex, run with these variables
 ```
@@ -162,6 +163,7 @@ GOOGLE_APPLICATION_CREDENTIALS=absolute-path-to-credential \
 PROJECT_ID=project-id \
 REGION=region \
 ./start.sh
+# On Windows use ./start.ps1 instead of ./start.sh
 ```
 *Note: Due to a bug in the latest docker, if you receive and error, try running with `--force-recreate`. For example `./start.sh --force-recreate `*
 
