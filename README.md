@@ -185,6 +185,23 @@ Run `./stop.sh` to tear down the service.
    npm install
    ```
 
+#### Running locally on Windows (no Docker)
+
+If you prefer a native setup rather than Docker Desktop, a helper script `start_windows.ps1` automates everything:
+
+```powershell
+./start_windows.ps1
+```
+
+The script will:
+
+1. Create a Python virtual-environment in `.venv` (or reuse an existing one).
+2. Install project dependencies (pip understands `pyproject.toml`).
+3. Spin up the backend with `uvicorn` on port 8000.
+4. Open a second PowerShell window, install Node packages, and launch the Next.js frontend on port 3000.
+
+Make sure you have Python 3.10+ and Node 18+ available in your PATH. Stop the services by closing the two PowerShell windows.
+
 ### Command Line Interface
 
 By default the CLI uses OpenRouter. Set `OPENROUTER_API_KEY` and optionally `OPENROUTER_BASE_URL` in `.env` then run:
