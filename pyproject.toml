@@ -8,12 +8,9 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "anthropic[vertex]>=0.50.0",
     "dataclasses-json>=0.6.7",
     "duckduckgo-search>=8.0.1",
     "fastapi>=0.115.12",
-    "google-cloud-aiplatform>=1.90.0",
-    "google-genai>=1.14.0",
     "ii-researcher>=0.1.5",
     "jsonschema>=4.23.0",
     "mammoth>=1.9.0",
@@ -21,7 +18,7 @@ dependencies = [
     "pandas>=2.2.3",
     "pathvalidate>=3.2.3",
     "pdfminer-six>=20250506",
-    "openai>=1.68.2",
+    "openai>=1.14,<2.0",
     "pexpect>=4.9.0",
     "pillow>=11.2.1",
     "pip>=25.1.1",
@@ -41,6 +38,7 @@ dependencies = [
     "uvicorn[standard]>=0.29.0,<0.30.0",
     "youtube-transcript-api>=1.0.3",
     "alembic>=1.16.1",
+    "colorama>=0.4.6",
 ]
 
 [project.optional-dependencies]
