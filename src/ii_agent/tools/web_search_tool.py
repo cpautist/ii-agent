@@ -19,9 +19,11 @@ class WebSearchTool(LLMTool):
     }
     output_type = "string"
 
-    def __init__(self, max_results=5, **kwargs):
+    def __init__(self, max_results: int = 5, multi_engine: bool = False, **kwargs):
         self.max_results = max_results
-        self.web_search_client = create_search_client(max_results=max_results, **kwargs)
+        self.web_search_client = create_search_client(
+            max_results=max_results, multi_engine=multi_engine, **kwargs
+        )
 
     async def run_impl(
         self,
