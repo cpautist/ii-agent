@@ -109,9 +109,11 @@ STATIC_FILE_BASE_URL=http://localhost:8000/
 We also support other search and crawl provider such as FireCrawl and SerpAPI (Optional but yield better performance):
 ```bash
 JINA_API_KEY=your_jina_key
-FIRECRAWL_API_KEY=your_firecrawl_key
-SERPAPI_API_KEY=your_serpapi_key 
+FIRECRAWL_KEY=your_firecrawl_key  # FIRECRAWL_API_KEY also supported
+SERPAPI_API_KEY=your_serpapi_key
 ```
+Set ``multi_engine=True`` when creating ``WebSearchTool`` to combine results from
+all available engines.
 
 We are supporting image generation and video generation tool by Vertex AI (Optional, good for more creative output), to use this, you need to set up the following variables:
 ```bash

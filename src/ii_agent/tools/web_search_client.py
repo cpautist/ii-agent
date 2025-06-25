@@ -155,7 +155,9 @@ class DuckDuckGoSearchClient(BaseSearchClient):
     async def forward_async(self, query: str) -> str:
         # Note: duckduckgo_search doesn't have async support, so we run it in a thread pool
         loop = asyncio.get_event_loop()
-        results = await loop.run_in_executor(None, self.ddgs.text, query, self.max_results)
+        results = await loop.run_in_executor(
+            None, self.ddgs.text, query, self.max_results
+        )
         if len(results) == 0:
             raise Exception("No results found! Try a less restrictive/shorter query.")
         postprocessed_results = [
@@ -206,6 +208,51 @@ class TavilySearchClient(BaseSearchClient):
 
         except Exception as e:
             return f"Error searching with Tavily: {str(e)}"
+
+
+class FirecrawlSearchClient(BaseSearchClient):
+    """A client for the Firecrawl search engine."""
+
+    name = "Firecrawl"
+
+    def __init__(self, max_results=5, **kwargs):
+        self.max_results = max_results
+        self.api_key = os.environ.get("FIRECRAWL_KEY") or os.environ.get(
+            "FIRECRAWL_API_KEY",
+            "",
+        )
+        if not self.api_key:
+            print(
+                "Warning: FIRECRAWL_KEY environment variable not set. Tool may not function correctly."
+            )
+
+    async def forward_async(self, query: str) -> str:
+        base_url = "https://api.firecrawl.dev/v1/search"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}",
+        }
+        payload = {"query": query, "max_results": self.max_results}
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    base_url, headers=headers, json=payload
+                ) as response:
+                    response.raise_for_status()
+                    response_data = await response.json()
+
+            results = response_data.get("results") or response_data.get("data", {}).get(
+                "results"
+            )
+            if not results:
+                return f"No search results found for query: {query}"
+
+            formatted_results = json.dumps(results, indent=4)
+            return truncate_content(formatted_results)
+
+        except Exception as e:
+            return f"Error searching with Firecrawl: {str(e)}"
 
 
 class ImageSearchClient:
@@ -263,28 +310,78 @@ class ImageSearchClient:
             return f"Error searching with SerpAPI: {str(e)}"
 
 
-def create_search_client(max_results=10, **kwargs) -> BaseSearchClient:
-    """
-    A search client that selects from available search APIs in the following order:
-    Tavily > Jina > SerpAPI > DuckDuckGo
+class MultiSearchClient(BaseSearchClient):
+    """Combines results from multiple search engines."""
 
-    It defaults to DuckDuckGo if no API keys are found for the other services.
+    name = "MultiEngine"
+
+    def __init__(self, clients: list[BaseSearchClient]):
+        self.clients = clients
+        self.max_results = sum(c.max_results for c in clients)
+
+    async def forward_async(self, query: str) -> str:
+        tasks = [c.forward_async(query) for c in self.clients]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        combined = []
+        for res in results:
+            if isinstance(res, Exception):
+                continue
+            try:
+                combined.extend(json.loads(res))
+            except Exception:
+                continue
+        return truncate_content(json.dumps(combined, indent=4))
+
+
+def create_search_client(
+    max_results: int = 10, multi_engine: bool = False, **kwargs
+) -> BaseSearchClient:
+    """Create a search client based on available API keys.
+
+    Priority order when ``multi_engine`` is ``False``:
+    Firecrawl > SerpAPI > Jina > Tavily > DuckDuckGo
+
+    When ``multi_engine`` is ``True`` all available engines are combined.
     """
+
+    clients: list[BaseSearchClient] = []
+
+    firecrawl_key = os.environ.get("FIRECRAWL_KEY") or os.environ.get(
+        "FIRECRAWL_API_KEY"
+    )
+    if firecrawl_key:
+        print("Using Firecrawl to search")
+        client = FirecrawlSearchClient(max_results=max_results, **kwargs)
+        if not multi_engine:
+            return client
+        clients.append(client)
 
     serp_api_key = os.environ.get("SERPAPI_API_KEY", "")
     if serp_api_key:
         print("Using SerpAPI to search")
-        return SerpAPISearchClient(max_results=max_results, **kwargs)
+        client = SerpAPISearchClient(max_results=max_results, **kwargs)
+        if not multi_engine and not clients:
+            return client
+        clients.append(client)
 
     jina_api_key = os.environ.get("JINA_API_KEY", "")
     if jina_api_key:
         print("Using Jina to search")
-        return JinaSearchClient(max_results=max_results, **kwargs)
+        client = JinaSearchClient(max_results=max_results, **kwargs)
+        if not multi_engine and not clients:
+            return client
+        clients.append(client)
 
     tavily_api_key = os.environ.get("TAVILY_API_KEY", "")
     if tavily_api_key:
         print("Using Tavily to search")
-        return TavilySearchClient(max_results=max_results, **kwargs)
+        client = TavilySearchClient(max_results=max_results, **kwargs)
+        if not multi_engine and not clients:
+            return client
+        clients.append(client)
+
+    if multi_engine and clients:
+        return MultiSearchClient(clients)
 
     print("Using DuckDuckGo to search")
     return DuckDuckGoSearchClient(max_results=max_results, **kwargs)
