@@ -14,7 +14,11 @@ def pytest_pyfunc_call(pyfuncitem):
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             try:
-                loop.run_until_complete(func(**pyfuncitem.funcargs))
+                kwargs = {
+                    name: pyfuncitem.funcargs[name]
+                    for name in pyfuncitem._fixtureinfo.argnames
+                }
+                loop.run_until_complete(func(**kwargs))
             finally:
                 loop.close()
             return True
