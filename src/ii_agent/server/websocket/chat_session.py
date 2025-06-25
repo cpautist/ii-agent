@@ -140,7 +140,9 @@ class ChatSession:
 
             # Create LLM client using factory
             client = self.client_factory.create_client(
-                init_content.model_name, thinking_tokens=init_content.thinking_tokens
+                init_content.model_name,
+                tool_args=init_content.tool_args,
+                thinking_tokens=init_content.thinking_tokens,
             )
 
             # Create agent using factory
@@ -344,7 +346,9 @@ class ChatSession:
             enhance_content = EnhancePromptContent(**content)
 
             # Create LLM client using factory
-            client = self.client_factory.create_client(enhance_content.model_name)
+            client = self.client_factory.create_client(
+                enhance_content.model_name, tool_args=None
+            )
 
             # Call the enhance_prompt function
             success, message, enhanced_prompt = await enhance_user_prompt(
