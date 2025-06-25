@@ -216,6 +216,12 @@ class OpenAIDirectClient(LLMClient):
                     extra_body["max_completion_tokens"] = max_tokens
                     openai_max_tokens = OpenAI_NOT_GIVEN
                     openai_temperature = OpenAI_NOT_GIVEN
+                logger.debug(
+                    "Calling model %s with tool_choice=%s tools=%s",
+                    self.model_name,
+                    tool_choice_param,
+                    [t.name for t in tools],
+                )
                 response = self.client.chat.completions.create(
                     model=self.model_name,
                     messages=openai_messages,

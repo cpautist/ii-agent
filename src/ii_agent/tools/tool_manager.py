@@ -234,7 +234,16 @@ class AgentToolManager:
         tool_input = tool_params.tool_input
         self.logger_for_agent_logs.info(f"Running tool: {tool_name}")
         self.logger_for_agent_logs.info(f"Tool input: {tool_input}")
-        result = await llm_tool.run_async(tool_input, history)
+        try:
+            result = await llm_tool.run_async(tool_input, history)
+        except Exception as exc:
+            self.logger_for_agent_logs.error(
+                "Error running tool %s with input %s: %s",
+                tool_name,
+                tool_input,
+                exc,
+            )
+            raise
 
         tool_input_str = "\n".join([f" - {k}: {v}" for k, v in tool_input.items()])
 

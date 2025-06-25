@@ -229,6 +229,8 @@ Options:
 - `--minimize-stdout-logs`: Reduce the amount of logs printed to stdout
 - `--shell-path`: Path to the shell executable used by the bash tool. Defaults
   to `/bin/bash` on Unix systems and `powershell` on Windows.
+- All tool activity is logged to `tool_calls.log` in the working directory for
+  troubleshooting.
 
 ### Web Interface
 
