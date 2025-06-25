@@ -47,7 +47,6 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
     dispatch({
       type: "SET_TOOL_SETTINGS",
       payload: {
-        ...state.toolSettings,
         [tool]: !state.toolSettings[tool],
       },
     });
@@ -62,6 +61,7 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
         media_generation: true,
         audio_generation: true,
         browser: true,
+        force_tool: true,
         thinking_tokens: 10000,
       },
     });
@@ -73,7 +73,6 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
     dispatch({
       type: "SET_TOOL_SETTINGS",
       payload: {
-        ...state.toolSettings,
         thinking_tokens: effort === "high" ? 10000 : 0,
       },
     });
@@ -92,7 +91,7 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
       if (!isClaudeModel && state.toolSettings.thinking_tokens > 0) {
         dispatch({
           type: "SET_TOOL_SETTINGS",
-          payload: { ...state.toolSettings, thinking_tokens: 0 },
+          payload: { thinking_tokens: 0 },
         });
       }
     }
@@ -332,6 +331,22 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
                       id="browser"
                       checked={state.toolSettings.browser}
                       onCheckedChange={() => handleToolToggle("browser")}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label htmlFor="force-tool" className="text-gray-300">
+                        Force tools on long queries
+                      </Label>
+                      <p className="text-xs text-gray-400">
+                        Require tool use when prompts are lengthy
+                      </p>
+                    </div>
+                    <Switch
+                      id="force-tool"
+                      checked={state.toolSettings.force_tool}
+                      onCheckedChange={() => handleToolToggle("force_tool")}
                     />
                   </div>
                 </div>

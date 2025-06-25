@@ -56,7 +56,10 @@ export type AppAction =
   | { type: "SET_BROWSER_URL"; payload: string }
   | { type: "SET_GENERATING_PROMPT"; payload: boolean }
   | { type: "SET_EDITING_MESSAGE"; payload: Message | undefined }
-  | { type: "SET_TOOL_SETTINGS"; payload: AppState["toolSettings"] }
+  | {
+      type: "SET_TOOL_SETTINGS";
+      payload: Partial<AppState["toolSettings"]>;
+    }
   | { type: "SET_SELECTED_MODEL"; payload: string | undefined }
   | { type: "SET_WS_CONNECTION_STATE"; payload: WebSocketConnectionState }
   | { type: "SET_AGENT_INITIALIZED"; payload: boolean }
@@ -91,6 +94,7 @@ const initialState: AppState = {
     media_generation: true,
     audio_generation: true,
     browser: true,
+    force_tool: true,
     thinking_tokens: 10000,
   },
   wsConnectionState: WebSocketConnectionState.CONNECTING,
@@ -164,7 +168,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case "SET_EDITING_MESSAGE":
       return { ...state, editingMessage: action.payload };
     case "SET_TOOL_SETTINGS":
-      return { ...state, toolSettings: action.payload };
+      return {
+        ...state,
+        toolSettings: { ...state.toolSettings, ...action.payload },
+      };
     case "SET_SELECTED_MODEL":
       return { ...state, selectedModel: action.payload };
     case "SET_WS_CONNECTION_STATE":
