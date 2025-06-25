@@ -2,6 +2,7 @@ import os
 import json
 import random
 import time
+import logging
 from typing import Any, Tuple, cast
 
 import openai
@@ -30,11 +31,13 @@ from ii_agent.llm.base import (
 )
 from ii_agent.llm.token_counter import TokenCounter
 
+logger = logging.getLogger(__name__)
+
 
 class OpenRouterClient(OpenAIDirectClient):
     """LLM client for OpenRouter (OpenAI-compatible API)."""
 
-    DEEP_RESEARCH_TOKEN_THRESHOLD = 80_000
+    DEEP_RESEARCH_TOKEN_THRESHOLD = 75
 
     def __init__(self, model_name: str, max_retries: int = 2, cot_model: bool = True):
         base_url = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
@@ -169,8 +172,20 @@ class OpenRouterClient(OpenAIDirectClient):
             and tool_args.get("deep_research")
             and prompt_tokens > self.DEEP_RESEARCH_TOKEN_THRESHOLD
         ):
+            force_tool_choice = tool_args.get("force_tool", True)
+
+        override_tool_choice = (
+            force_tool_choice
+            or "flash" in self.model_name
+            or "nano" in self.model_name
+        )
+        if override_tool_choice:
+            logger.debug(
+                "Overriding tool_choice to 'required' for %s (force_tool_choice=%s)",
+                self.model_name,
+                force_tool_choice,
+            )
             tool_choice_param = "required"
-            force_tool_choice = True
 
         response = None
         for retry in range(self.max_retries):
@@ -180,7 +195,7 @@ class OpenRouterClient(OpenAIDirectClient):
                 if self.cot_model:
                     extra_body["max_completion_tokens"] = max_tokens
                     openai_max_tokens = OpenAI_NOT_GIVEN
-                if force_tool_choice:
+                if override_tool_choice:
                     extra_body["parallel_tool_calls"] = False
                 response = self.client.chat.completions.create(
                     model=self.model_name,
