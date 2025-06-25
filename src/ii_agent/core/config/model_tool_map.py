@@ -1,3 +1,8 @@
+"""Default tool settings for each model.
+
+The flags defined here are merged with any settings provided by the UI.
+"""
+
 from typing import Dict, Any
 
 # Mapping of model names to their default tool settings. Incoming
@@ -16,6 +21,18 @@ MODEL_TOOL_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "media_generation": True,
         "audio_generation": True,
         "browser": True,
+    },
+    "openrouter/google/gemini-2.5-flash-001": {
+        "deep_research": True,
+    },
+    "openrouter/google/gemini-2.5-pro": {
+        "deep_research": True,
+    },
+    "openrouter/openai/gpt-4.1-mini": {
+        "deep_research": True,
+    },
+    "openrouter/openai/gpt-4.1-nano": {
+        "deep_research": True,
     },
 }
 
