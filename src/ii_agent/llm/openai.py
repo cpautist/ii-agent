@@ -34,9 +34,14 @@ from ii_agent.llm.base import (
     ToolFormattedResult,
 )
 
+# NOTE: This client is also used by OpenRouter because their API is
+# OpenAI-compatible.  We therefore rely on the OpenAI function-calling
+# schema for tools and forward the tool spec in every request so models
+# that support tool calling (e.g. `google/gemini-*` via OpenRouter) know
+# what functions are available.
 
 class OpenAIDirectClient(LLMClient):
-    """Use OpenAI models via first party API."""
+    """LLM client that speaks the OpenAI chat-completions protocol."""
 
     def __init__(self, model_name: str, max_retries=2, cot_model: bool = True, azure_model: bool = False):
         """Initialize the OpenAI first party client."""
@@ -173,7 +178,7 @@ class OpenAIDirectClient(LLMClient):
 
         # Turn tool_choice into OpenAI tool_choice format
         if tool_choice is None:
-            tool_choice_param = OpenAI_NOT_GIVEN
+            tool_choice_param = "auto" if len(tools) > 0 else OpenAI_NOT_GIVEN
         elif tool_choice["type"] == "any":
             tool_choice_param = "required"
         elif tool_choice["type"] == "auto":

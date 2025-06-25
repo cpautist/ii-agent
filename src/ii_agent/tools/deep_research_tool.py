@@ -6,6 +6,9 @@ from ii_agent.tools.base import LLMTool, ToolImplOutput
 from ii_researcher.reasoning.agent import ReasoningAgent
 from ii_researcher.reasoning.builders.report import ReportType
 import asyncio
+import logging
+
+logger = logging.getLogger("tool_calls")
 
 
 def on_token(token: str):
@@ -56,6 +59,7 @@ class DeepResearchTool(LLMTool):
         tool_input: dict[str, Any],
         message_history: Optional[MessageHistory] = None,
     ) -> ToolImplOutput:
+        logger.info("DeepResearchTool START query=%s", tool_input["query"])
         print(f"Performing deep research on {tool_input['query']}")
         agent = ReasoningAgent(
             question=tool_input["query"], report_type=ReportType.BASIC
@@ -64,6 +68,7 @@ class DeepResearchTool(LLMTool):
 
         assert result, "Model returned empty answer"
         self.answer = result
+        logger.info("DeepResearchTool END chars=%d", len(result))
         return ToolImplOutput(result, "Task completed")
 
     def get_tool_start_message(self, tool_input: dict[str, Any]) -> str:

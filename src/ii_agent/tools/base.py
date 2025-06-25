@@ -2,9 +2,10 @@ from abc import ABC, abstractmethod
 import asyncio
 from dataclasses import dataclass, field
 from typing import Any, Optional
+import logging
 
 import jsonschema
-from anthropic import BadRequestError
+# Using OpenRouter/OpenAI compatible format - no need for provider-specific exceptions
 from typing_extensions import final
 
 from ii_agent.llm.base import (
@@ -14,6 +15,16 @@ from ii_agent.llm.message_history import MessageHistory
 
 ToolInputSchema = dict[str, Any]
 
+# Centralized logger for all tool calls/results
+logger = logging.getLogger("tool_calls")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    # File log
+    file_handler = logging.FileHandler("tool_calls.log")
+    file_handler.setFormatter(logging.Formatter("%(asctime)s %(message)s"))
+    logger.addHandler(file_handler)
+    # Also echo to stdout for convenience
+    logger.addHandler(logging.StreamHandler())
 
 @dataclass
 class ToolImplOutput:
@@ -66,12 +77,23 @@ class LLMTool(ABC):
         """
         try:
             self._validate_tool_input(tool_input)
+            # Log the invocation
+            logger.info("TOOL_CALL %s input=%s", self.name, tool_input)
+
             result = await self.run_impl(tool_input, message_history)
+
+            # Log completion
+            logger.info(
+                "TOOL_DONE %s result=%s", self.name, result.tool_result_message
+            )
             tool_output = result.tool_output
         except jsonschema.ValidationError as exc:
             tool_output = "Invalid tool input: " + exc.message
-        except BadRequestError as exc:
-            raise RuntimeError("Bad request: " + exc.message)
+        except Exception as exc:
+            # Generic exception handling for any LLM provider errors
+            if "bad request" in str(exc).lower() or "400" in str(exc):
+                raise RuntimeError("Bad request: " + str(exc))
+            raise
 
         return tool_output
 

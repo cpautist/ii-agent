@@ -15,9 +15,22 @@ import os
 import pexpect
 import re
 from abc import ABC, abstractmethod
+import sys
 
 from ii_agent.llm.message_history import MessageHistory
 from ii_agent.tools.base import LLMTool, ToolImplOutput
+
+# On Windows, pexpect lacks spawn; use wexpect as a drop-in replacement
+if sys.platform == "win32":
+    try:
+        import wexpect  # type: ignore
+
+        # Monkey-patch pexpect to expose spawn for existing code paths
+        if not hasattr(pexpect, "spawn"):
+            pexpect.spawn = wexpect.spawn  # type: ignore
+    except ImportError:
+        # wexpect not installed; BashTool will raise a clear error later
+        pass
 
 
 def start_persistent_shell(timeout: int, shell_path: Optional[str] = None):
