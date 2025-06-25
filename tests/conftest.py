@@ -23,8 +23,8 @@ if "anthropic" not in sys.modules:
 
     types_stub = types.ModuleType("anthropic.types")
     types_stub.TextBlock = object
-    types_stub.ThinkingBlock = object
-    types_stub.RedactedThinkingBlock = object
+    types_stub.ThinkingBlock = type("ThinkingBlock", (), {})
+    types_stub.RedactedThinkingBlock = type("RedactedThinkingBlock", (), {})
     types_stub.ImageBlockParam = object
     types_stub.ToolParam = object
     types_stub.ToolResultBlockParam = object
