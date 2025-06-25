@@ -3,6 +3,11 @@ from ii_agent.tools.base import (
     ToolImplOutput,
 )
 from typing import Any, Optional
+import asyncio
+import uuid
+
+from ii_agent.core.event import EventType, RealtimeEvent
+from ii_agent.tools.message_tool import MessageTool
 from ii_agent.llm.message_history import MessageHistory
 from ii_agent.tools.visit_webpage_client import (
     create_visit_client,
@@ -28,9 +33,51 @@ class VisitWebpageTool(LLMTool):
     }
     output_type = "string"
 
-    def __init__(self, max_output_length: int = VISIT_WEB_PAGE_MAX_OUTPUT_LENGTH):
+    def __init__(
+        self,
+        max_output_length: int = VISIT_WEB_PAGE_MAX_OUTPUT_LENGTH,
+        message_queue: asyncio.Queue | None = None,
+    ):
         self.max_output_length = max_output_length
         self.visit_client = create_visit_client(max_output_length=max_output_length)
+        self.message_queue = message_queue
+
+    def _send_progress(self, text: str) -> None:
+        """Send a progress update via the message queue."""
+        if self.message_queue is None:
+            return
+        call_id = str(uuid.uuid4())
+        self.message_queue.put_nowait(
+            RealtimeEvent(
+                type=EventType.TOOL_CALL,
+                content={
+                    "tool_call_id": call_id,
+                    "tool_name": MessageTool.name,
+                    "tool_input": {"text": text},
+                },
+            )
+        )
+        self.message_queue.put_nowait(
+            RealtimeEvent(
+                type=EventType.TOOL_RESULT,
+                content={
+                    "tool_call_id": call_id,
+                    "tool_name": MessageTool.name,
+                    "result": text,
+                },
+            )
+        )
+
+    async def _progress_loop(self, url: str) -> None:
+        """Periodically notify the user that a URL is being fetched."""
+        elapsed = 0
+        try:
+            while True:
+                await asyncio.sleep(5)
+                elapsed += 5
+                self._send_progress(f"Fetching {url}... {elapsed}s elapsed")
+        except asyncio.CancelledError:
+            pass
 
     async def run_impl(
         self,
@@ -41,8 +88,13 @@ class VisitWebpageTool(LLMTool):
         if "arxiv.org/abs" in url:
             url = "https://arxiv.org/html/" + url.split("/")[-1]
 
+        # Notify user and start progress updates
+        self._send_progress(f"Starting fetch for {url}")
+        progress_task = asyncio.create_task(self._progress_loop(url))
+
         try:
             output = await self.visit_client.forward_async(url)
+            self._send_progress(f"Completed fetch for {url}")
             return ToolImplOutput(
                 output,
                 f"Webpage {url} successfully visited using {self.visit_client.name}",
@@ -72,3 +124,5 @@ class VisitWebpageTool(LLMTool):
                 f"Failed to visit {url}",
                 auxiliary_data={"success": False},
             )
+        finally:
+            progress_task.cancel()
