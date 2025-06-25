@@ -166,6 +166,7 @@ export interface ToolSettings {
   media_generation: boolean;
   audio_generation: boolean;
   browser: boolean;
+  force_tool: boolean;
   thinking_tokens: number;
 }
 export interface GooglePickerResponse {
