@@ -3,6 +3,7 @@ import asyncio
 import logging
 from copy import deepcopy
 from typing import Optional, List, Dict, Any
+from ii_agent.core.config.model_tool_map import MODEL_TOOL_DEFAULTS
 from ii_agent.llm.base import LLMClient
 from ii_agent.llm.context_manager.llm_summarizing import LLMSummarizingContextManager
 from ii_agent.llm.token_counter import TokenCounter
@@ -93,6 +94,18 @@ def get_system_tools(
         logger=logger,
         token_budget=TOKEN_BUDGET,
     )
+
+    # Merge default tool settings with UI-provided settings
+    default_args = MODEL_TOOL_DEFAULTS.get(client.model_name, {})
+    provided_args = tool_args or {}
+    merged_tool_args = {**default_args, **provided_args}
+
+    # Ensure required flags are present if defaults or UI indicate they should be enabled
+    for flag in ["deep_research"]:
+        if (default_args.get(flag) or provided_args.get(flag)) and not merged_tool_args.get(flag):
+            raise ValueError(f"Required flag '{flag}' missing from tool settings")
+
+    tool_args = merged_tool_args
 
     tools = [
         MessageTool(),
