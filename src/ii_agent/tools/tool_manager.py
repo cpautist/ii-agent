@@ -43,13 +43,15 @@ from ii_agent.tools.audio_tool import (
     AudioTranscribeTool,
     AudioGenerateTool,
 )
-from ii_agent.tools.video_gen_tool import (
-    VideoGenerateFromTextTool,
-    VideoGenerateFromImageTool,
-    LongVideoGenerateFromTextTool,
-    LongVideoGenerateFromImageTool,
-)
-from ii_agent.tools.image_gen_tool import ImageGenerateTool
+# Video generation tools disabled for OpenRouter-only setup (requires Google Cloud)
+# from ii_agent.tools.video_gen_tool import (
+#     VideoGenerateFromTextTool,
+#     VideoGenerateFromImageTool,
+#     LongVideoGenerateFromTextTool,
+#     LongVideoGenerateFromImageTool,
+# )
+# Image generation tool disabled for OpenRouter-only setup (requires Google Cloud)
+# from ii_agent.tools.image_gen_tool import ImageGenerateTool
 from ii_agent.tools.pdf_tool import PdfTextExtractTool
 from ii_agent.tools.deep_research_tool import DeepResearchTool
 from ii_agent.tools.list_html_links_tool import ListHtmlLinksTool
@@ -126,14 +128,17 @@ def get_system_tools(
             os.environ.get("MEDIA_GCP_PROJECT_ID")
             and os.environ.get("MEDIA_GCP_LOCATION")
         ):
-            tools.append(ImageGenerateTool(workspace_manager=workspace_manager))
-            if tool_args.get("video_generation", False):
-                tools.extend([
-                    VideoGenerateFromTextTool(workspace_manager=workspace_manager), 
-                    VideoGenerateFromImageTool(workspace_manager=workspace_manager),
-                    LongVideoGenerateFromTextTool(workspace_manager=workspace_manager),
-                    LongVideoGenerateFromImageTool(workspace_manager=workspace_manager)
-                ])
+            # Image generation disabled for OpenRouter-only setup
+            # tools.append(ImageGenerateTool(workspace_manager=workspace_manager))
+            # Video generation disabled for OpenRouter-only setup
+            # if tool_args.get("video_generation", False):
+            #     tools.extend([
+            #         VideoGenerateFromTextTool(workspace_manager=workspace_manager), 
+            #         VideoGenerateFromImageTool(workspace_manager=workspace_manager),
+            #         LongVideoGenerateFromTextTool(workspace_manager=workspace_manager),
+            #         LongVideoGenerateFromImageTool(workspace_manager=workspace_manager)
+            #     ])
+            pass
         if tool_args.get("audio_generation", False) and (
             os.environ.get("OPEN_API_KEY") and os.environ.get("AZURE_OPENAI_ENDPOINT")
         ):
