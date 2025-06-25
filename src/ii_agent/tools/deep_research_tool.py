@@ -1,12 +1,16 @@
 """Tool for performing deep research on a complex topic."""
 
 from typing import Any, Optional
-from ii_agent.llm.message_history import MessageHistory
-from ii_agent.tools.base import LLMTool, ToolImplOutput
-from ii_researcher.reasoning.agent import ReasoningAgent
-from ii_researcher.reasoning.builders.report import ReportType
 import asyncio
 import logging
+import uuid
+
+from ii_agent.llm.message_history import MessageHistory
+from ii_agent.tools.base import LLMTool, ToolImplOutput
+from ii_agent.core.event import EventType, RealtimeEvent
+from ii_agent.tools.message_tool import MessageTool
+from ii_researcher.reasoning.agent import ReasoningAgent
+from ii_researcher.reasoning.builders.report import ReportType
 
 logger = logging.getLogger("tool_calls")
 
@@ -43,9 +47,45 @@ class DeepResearchTool(LLMTool):
         "required": ["query"],
     }
 
-    def __init__(self):
+    def __init__(self, message_queue: asyncio.Queue | None = None):
         super().__init__()
         self.answer: str = ""
+        self.message_queue = message_queue
+
+    def _send_progress(self, text: str) -> None:
+        """Send a progress update via the message queue."""
+        if self.message_queue is None:
+            return
+        call_id = str(uuid.uuid4())
+        self.message_queue.put_nowait(
+            RealtimeEvent(
+                type=EventType.TOOL_CALL,
+                content={
+                    "tool_call_id": call_id,
+                    "tool_name": MessageTool.name,
+                    "tool_input": {"text": text},
+                },
+            )
+        )
+        self.message_queue.put_nowait(
+            RealtimeEvent(
+                type=EventType.TOOL_RESULT,
+                content={
+                    "tool_call_id": call_id,
+                    "tool_name": MessageTool.name,
+                    "result": text,
+                },
+            )
+        )
+
+    async def _progress_loop(self, query: str) -> None:
+        """Periodically notify the user that research is ongoing."""
+        try:
+            while True:
+                await asyncio.sleep(15)
+                self._send_progress(f"Still researching {query}...")
+        except asyncio.CancelledError:
+            pass
 
     @property
     def should_stop(self):
@@ -61,10 +101,16 @@ class DeepResearchTool(LLMTool):
     ) -> ToolImplOutput:
         logger.info("DeepResearchTool START query=%s", tool_input["query"])
         print(f"Performing deep research on {tool_input['query']}")
+        self._send_progress(f"Starting deep research for {tool_input['query']}")
+        progress_task = asyncio.create_task(self._progress_loop(tool_input["query"]))
+
         agent = ReasoningAgent(
             question=tool_input["query"], report_type=ReportType.BASIC
         )
-        result = await agent.run(on_token=on_token, is_stream=True)
+        try:
+            result = await agent.run(on_token=on_token, is_stream=True)
+        finally:
+            progress_task.cancel()
 
         assert result, "Model returned empty answer"
         self.answer = result
