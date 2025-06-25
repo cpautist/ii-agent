@@ -15,6 +15,7 @@ from ii_agent.tools.utils import encode_image
 from ii_agent.db.manager import Events
 from ii_agent.tools import AgentToolManager
 from ii_agent.utils.constants import COMPLETE_MESSAGE
+import time
 from ii_agent.utils.workspace_manager import WorkspaceManager
 
 TOOL_RESULT_INTERRUPT_MESSAGE = "Tool execution interrupted by user."
@@ -24,6 +25,11 @@ TOOL_CALL_INTERRUPT_FAKE_MODEL_RSP = (
 )
 AGENT_INTERRUPT_FAKE_MODEL_RSP = (
     "Agent interrupted by user. You can resume by providing a new instruction."
+)
+
+TOOL_CALL_TIMEOUT_MESSAGE = "Tool execution timed out."
+TOOL_CALL_TIMEOUT_FAKE_MODEL_RSP = (
+    "Tool execution timed out. You can resume by providing a new instruction."
 )
 
 
@@ -58,6 +64,7 @@ try breaking down the task into smaller steps. After call this tool to update or
         logger_for_agent_logs: logging.Logger,
         max_output_tokens_per_turn: int = 8192,
         max_turns: int = 10,
+        tool_timeout: float = 180.0,
         websocket: Optional[WebSocket] = None,
         session_id: Optional[uuid.UUID] = None,
         interactive_mode: bool = True,
@@ -72,6 +79,7 @@ try breaking down the task into smaller steps. After call this tool to update or
             logger_for_agent_logs: Logger for agent logs
             max_output_tokens_per_turn: Maximum tokens per turn
             max_turns: Maximum number of turns
+            tool_timeout: Timeout in seconds for tool execution
             websocket: Optional WebSocket for real-time communication
             session_id: UUID of the session this agent belongs to
             interactive_mode: Whether to use interactive mode
@@ -90,6 +98,8 @@ try breaking down the task into smaller steps. After call this tool to update or
         self.logger_for_agent_logs = logger_for_agent_logs
         self.max_output_tokens = max_output_tokens_per_turn
         self.max_turns = max_turns
+        self.tool_timeout = tool_timeout
+        self.tool_start_time: float | None = None
 
         self.interrupted = False
         self.history = init_history
@@ -271,6 +281,7 @@ try breaking down the task into smaller steps. After call this tool to update or
                     },
                 )
             )
+            self.tool_start_time = time.monotonic()
 
             text_results = [
                 item for item in model_response if isinstance(item, TextResult)
@@ -290,7 +301,18 @@ try breaking down the task into smaller steps. After call this tool to update or
                     tool_output=TOOL_RESULT_INTERRUPT_MESSAGE,
                     tool_result_message=TOOL_RESULT_INTERRUPT_MESSAGE,
                 )
-            tool_result = await self.tool_manager.run_tool(tool_call, self.history)
+            try:
+                tool_result = await asyncio.wait_for(
+                    self.tool_manager.run_tool(tool_call, self.history),
+                    timeout=self.tool_timeout,
+                )
+            except asyncio.TimeoutError:
+                self.add_tool_call_result(tool_call, TOOL_CALL_TIMEOUT_MESSAGE)
+                self.add_fake_assistant_turn(TOOL_CALL_TIMEOUT_FAKE_MODEL_RSP)
+                return ToolImplOutput(
+                    tool_output=TOOL_CALL_TIMEOUT_MESSAGE,
+                    tool_result_message=TOOL_CALL_TIMEOUT_MESSAGE,
+                )
 
             self.add_tool_call_result(tool_call, tool_result)
             if self.tool_manager.should_stop():
