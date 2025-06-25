@@ -134,7 +134,7 @@ def get_system_tools(
         if tool_args.get("sequential_thinking", False):
             tools.append(SequentialThinkingTool())
         if tool_args.get("deep_research", False):
-            tools.append(DeepResearchTool())
+            tools.append(DeepResearchTool(message_queue=message_queue))
         if tool_args.get("pdf", False):
             tools.append(PdfTextExtractTool(workspace_manager=workspace_manager))
         if tool_args.get("media_generation", False) and (
