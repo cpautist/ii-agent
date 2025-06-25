@@ -1,5 +1,6 @@
 from ii_agent.llm.base import LLMClient
 from ii_agent.llm import get_client
+from ii_agent.core.config.model_tool_map import MODEL_TOOL_DEFAULTS
 import logging
 
 logger = logging.getLogger(__name__)
@@ -38,7 +39,12 @@ class ClientFactory:
         elif model_name.startswith("or:"):
             cleaned_name = model_name[len("or:") :]
 
-        enabled_tools = [k for k, v in (tool_args or {}).items() if v]
+        merged_tool_args = {
+            **MODEL_TOOL_DEFAULTS.get(model_name, {}),
+            **(tool_args or {}),
+        }
+
+        enabled_tools = [k for k, v in merged_tool_args.items() if v]
         logger.info(
             "Using model %s with tools %s",
             cleaned_name,

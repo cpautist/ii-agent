@@ -20,6 +20,7 @@ from ii_agent.server.models.messages import (
     EditQueryContent,
 )
 from ii_agent.server.factories import ClientFactory, AgentFactory
+from ii_agent.core.config.model_tool_map import MODEL_TOOL_DEFAULTS
 
 logger = logging.getLogger(__name__)
 
@@ -138,10 +139,15 @@ class ChatSession:
         try:
             init_content = InitAgentContent(**content)
 
+            model_defaults = MODEL_TOOL_DEFAULTS.get(
+                init_content.model_name, {}
+            )
+            merged_tool_args = {**model_defaults, **init_content.tool_args}
+
             # Create LLM client using factory
             client = self.client_factory.create_client(
                 init_content.model_name,
-                tool_args=init_content.tool_args,
+                tool_args=merged_tool_args,
                 thinking_tokens=init_content.thinking_tokens,
             )
 
@@ -151,7 +157,7 @@ class ChatSession:
                 self.session_uuid,
                 self.workspace_manager,
                 self.websocket,
-                init_content.tool_args,
+                merged_tool_args,
                 self.file_store,
             )
 
