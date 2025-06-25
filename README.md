@@ -261,6 +261,39 @@ npm run dev
 
 3. Open your browser to http://localhost:3000
 
+## Deep Research Quick-start
+
+The agent loads a default set of tools based on the selected model. For
+`anthropic/claude-sonnet-4` and `anthropic/claude-opus-4` the defaults are:
+
+- `deep_research`: `false`
+- `pdf`: `true`
+- `media_generation`: `true`
+- `audio_generation`: `true`
+- `browser`: `true`
+
+You can override these defaults when starting the backend by passing
+`--tool-args` on the command line:
+
+```bash
+python ws_server.py --tool-args '{"deep_research": true}'
+```
+
+In the web interface open **Run settings** and toggle **Deep Research** under
+the Tools section to achieve the same effect.
+
+### Timeout Handling
+
+Each tool call now respects a timeout (default 180&nbsp;seconds). When a tool
+takes too long, the agent inserts `Tool execution timed out.` and returns
+control. This behaviour is implemented in `FunctionCallAgent`.
+
+### UI Toggle Behaviour
+
+The settings drawer groups tool switches under a collapsible "Tools" header. The
+selected flags are sent with every run so you can enable or disable capabilities
+without restarting the server.
+
 ## Project Structure
 
 - `cli.py`: Command-line interface
