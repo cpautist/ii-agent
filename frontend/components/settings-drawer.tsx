@@ -16,6 +16,7 @@ import {
 import { Input } from "./ui/input";
 import { Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip";
 import { AVAILABLE_MODELS, ToolSettings } from "@/typings/agent";
+import { MODEL_TOOL_DEFAULTS } from "@/config/model-tool-defaults";
 import { useAppContext } from "@/context/app-context";
 
 interface SettingsDrawerProps {
@@ -77,6 +78,14 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
       },
     });
   };
+
+  useEffect(() => {
+    const defaults = MODEL_TOOL_DEFAULTS[state.selectedModel] || {};
+    const merged = { ...state.toolSettings, ...defaults };
+    if (JSON.stringify(merged) !== JSON.stringify(state.toolSettings)) {
+      dispatch({ type: "SET_TOOL_SETTINGS", payload: merged });
+    }
+  }, [state.selectedModel]);
 
   useEffect(() => {
     if (state.selectedModel) {
