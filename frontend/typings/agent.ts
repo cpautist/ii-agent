@@ -26,6 +26,10 @@ export const AVAILABLE_MODELS = [
   "x-ai/grok-3-mini-beta",
   "x-ai/grok-3-mini",
   "anthropic/claude-opus-4",
+  "google/gemini-2.0-flash-001",
+  "google/gemini-2.5-pro",
+  "deepseek/deepseek-r1:free",
+  "x-ai/grok-3-beta",
 ];
 
 export enum WebSocketConnectionState {
