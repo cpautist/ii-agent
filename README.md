@@ -127,16 +127,6 @@ Image Search Tool  (Optional, good for more beautiful output)
 SERPAPI_API_KEY=your_serpapi_key
 ```
 
-### OpenRouter Model Names
-
-Prefix model identifiers with `openrouter/` or `or:` so the client factory can
-detect and use `OpenRouterClient`. Example:
-
-```bash
---model-name openrouter/meta-llama/llama-3-70b-instruct
-```
-
-
 ## Installation
 
 ### Docker Installation (Recommended)
@@ -269,10 +259,10 @@ The agent loads a default set of tools based on the selected model:
 |-------|---------------|-----|-----------------|-----------------|---------|
 | anthropic/claude-sonnet-4 | false | true | true | true | true |
 | anthropic/claude-opus-4   | false | true | true | true | true |
-| openrouter/google/gemini-2.5-flash-001 | true | false | false | false | false |
-| openrouter/google/gemini-2.5-pro | true | false | false | false | false |
-| openrouter/openai/gpt-4.1-mini | true | false | false | false | false |
-| openrouter/openai/gpt-4.1-nano | true | false | false | false | false |
+| google/gemini-2.5-flash-001 | true | false | false | false | false |
+| google/gemini-2.5-pro | true | false | false | false | false |
+| openai/gpt-4.1-mini | true | false | false | false | false |
+| openai/gpt-4.1-nano | true | false | false | false | false |
 
 Unlisted tools default to `false`.
 
