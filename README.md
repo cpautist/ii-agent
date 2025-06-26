@@ -263,14 +263,18 @@ npm run dev
 
 ## Deep Research Quick-start
 
-The agent loads a default set of tools based on the selected model. For
-`anthropic/claude-sonnet-4` and `anthropic/claude-opus-4` the defaults are:
+The agent loads a default set of tools based on the selected model:
 
-- `deep_research`: `false`
-- `pdf`: `true`
-- `media_generation`: `true`
-- `audio_generation`: `true`
-- `browser`: `true`
+| Model | deep_research | pdf | media_generation | audio_generation | browser |
+|-------|---------------|-----|-----------------|-----------------|---------|
+| anthropic/claude-sonnet-4 | false | true | true | true | true |
+| anthropic/claude-opus-4   | false | true | true | true | true |
+| openrouter/google/gemini-2.5-flash-001 | true | false | false | false | false |
+| openrouter/google/gemini-2.5-pro | true | false | false | false | false |
+| openrouter/openai/gpt-4.1-mini | true | false | false | false | false |
+| openrouter/openai/gpt-4.1-nano | true | false | false | false | false |
+
+Unlisted tools default to `false`.
 
 You can override these defaults when starting the backend by passing
 `--tool-args` on the command line:
@@ -281,6 +285,9 @@ python ws_server.py --tool-args '{"deep_research": true}'
 
 In the web interface open **Run settings** and toggle **Deep Research** under
 the Tools section to achieve the same effect.
+
+`DeepResearchTool` now streams a start message and periodic progress updates so
+you can monitor long-running research tasks.
 
 ### Timeout Handling
 
@@ -293,6 +300,10 @@ control. This behaviour is implemented in `FunctionCallAgent`.
 The settings drawer groups tool switches under a collapsible "Tools" header. The
 selected flags are sent with every run so you can enable or disable capabilities
 without restarting the server.
+
+A new **Force tools on long queries** switch can require tool use when prompts
+exceed 75 tokens. When enabled alongside **Deep Research**, the model is forced
+to call a tool for lengthy inputs instead of replying directly.
 
 ## Project Structure
 
