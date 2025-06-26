@@ -67,13 +67,13 @@ Replace `<your-lmstudio-ip>:<port>` and `<your-model-identifier-in-lmstudio>` wi
 
 ## Using OpenRouter Models
 
-OpenRouter offers an OpenAI-compatible API for many community models. Set `OPENROUTER_API_KEY` and optionally `OPENROUTER_BASE_URL` before running. Start the agent with `--llm-client openrouter-direct` and prefix your model name with `openrouter/`.
+OpenRouter offers an OpenAI-compatible API for many community models. Set `OPENROUTER_API_KEY` and optionally `OPENROUTER_BASE_URL` before running. Start the agent with `--llm-client openrouter-direct` and specify the model using its `provider/model` slug.
 
 ### Example
 ```bash
-python cli.py 
-    --llm-client openrouter-direct 
-    --model-name openrouter/meta-llama/llama-3-70b-instruct
+python cli.py
+    --llm-client openrouter-direct
+    --model-name openai/gpt-4o
 ```
 
 ## Troubleshooting
