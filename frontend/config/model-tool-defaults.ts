@@ -13,16 +13,16 @@ export const MODEL_TOOL_DEFAULTS: Record<string, Partial<import("@/typings/agent
     audio_generation: true,
     browser: true,
   },
-  "openrouter/google/gemini-2.5-flash-001": {
+  "google/gemini-2.5-flash-001": {
     deep_research: true,
   },
-  "openrouter/google/gemini-2.5-pro": {
+  "google/gemini-2.5-pro": {
     deep_research: true,
   },
-  "openrouter/openai/gpt-4.1-mini": {
+  "openai/gpt-4.1-mini": {
     deep_research: true,
   },
-  "openrouter/openai/gpt-4.1-nano": {
+  "openai/gpt-4.1-nano": {
     deep_research: true,
   },
 };
