@@ -83,8 +83,8 @@ def parse_common_args(parser: ArgumentParser):
     parser.add_argument(
         "--model-name",
         type=str,
-        default="openai/gpt-4.1",
-        help="Name of the LLM model to use (e.g., openai/gpt-4.1)",
+        default="openrouter/openai/gpt-4.1",
+        help="Name of the LLM model to use (e.g., openrouter/openai/gpt-4.1)",
     )
     parser.add_argument(
         "--azure-model",
