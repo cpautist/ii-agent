@@ -13,9 +13,10 @@ from ii_agent.llm.context_manager.llm_summarizing import LLMSummarizingContextMa
 from ii_agent.llm.token_counter import TokenCounter
 from ii_agent.db.manager import Sessions
 from ii_agent.tools import get_system_tools
-from ii_agent.prompts.system_prompt import (
+from ii_agent.prompts import (
     SYSTEM_PROMPT,
     SYSTEM_PROMPT_WITH_SEQ_THINKING,
+    GEMINI_PROMPT,
 )
 from ii_agent.utils.constants import TOKEN_BUDGET
 
@@ -181,12 +182,15 @@ class AgentFactory:
             shell_path=self.config.shell_path,
         )
 
-        # Choose system prompt based on tool args
-        system_prompt = (
-            SYSTEM_PROMPT_WITH_SEQ_THINKING
-            if tool_args.get("sequential_thinking", False)
-            else SYSTEM_PROMPT
-        )
+        # Choose system prompt based on model and tool args
+        if "gemini" in client.model_name.lower():
+            system_prompt = GEMINI_PROMPT
+        else:
+            system_prompt = (
+                SYSTEM_PROMPT_WITH_SEQ_THINKING
+                if tool_args.get("sequential_thinking", False)
+                else SYSTEM_PROMPT
+            )
 
         # try to get history from file store
         init_history = MessageHistory(context_manager)
