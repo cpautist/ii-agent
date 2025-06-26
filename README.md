@@ -285,7 +285,7 @@ the Tools section to achieve the same effect.
 ### Timeout Handling
 
 Each tool call now respects a timeout (default 180&nbsp;seconds). When a tool
-takes too long, the agent inserts `Tool execution timed out.` and returns
+takes too long, the agent inserts `⚠️ Research timed out after 180 seconds.` and returns
 control. This behaviour is implemented in `FunctionCallAgent`.
 
 ### UI Toggle Behaviour

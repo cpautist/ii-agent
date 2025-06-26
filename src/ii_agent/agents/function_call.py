@@ -27,9 +27,9 @@ AGENT_INTERRUPT_FAKE_MODEL_RSP = (
     "Agent interrupted by user. You can resume by providing a new instruction."
 )
 
-TOOL_CALL_TIMEOUT_MESSAGE = "Tool execution timed out."
+TOOL_CALL_TIMEOUT_MESSAGE = "⚠️ Research timed out after 180 seconds."
 TOOL_CALL_TIMEOUT_FAKE_MODEL_RSP = (
-    "Tool execution timed out. You can resume by providing a new instruction."
+    "⚠️ Research timed out after 180 seconds. You can resume by providing a new instruction."
 )
 
 
