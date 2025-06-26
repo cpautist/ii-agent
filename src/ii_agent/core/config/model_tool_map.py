@@ -22,16 +22,16 @@ MODEL_TOOL_DEFAULTS: Dict[str, Dict[str, Any]] = {
         "audio_generation": True,
         "browser": True,
     },
-    "openrouter/google/gemini-2.5-flash-001": {
+    "google/gemini-2.5-flash-001": {
         "deep_research": True,
     },
-    "openrouter/google/gemini-2.5-pro": {
+    "google/gemini-2.5-pro": {
         "deep_research": True,
     },
-    "openrouter/openai/gpt-4.1-mini": {
+    "openai/gpt-4.1-mini": {
         "deep_research": True,
     },
-    "openrouter/openai/gpt-4.1-nano": {
+    "openai/gpt-4.1-nano": {
         "deep_research": True,
     },
 }
