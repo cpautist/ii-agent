@@ -8,9 +8,12 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
+    "anthropic[vertex]>=0.50.0",
     "dataclasses-json>=0.6.7",
     "duckduckgo-search>=8.0.1",
     "fastapi>=0.115.12",
+    "google-cloud-aiplatform>=1.90.0",
+    "google-genai>=1.14.0",
     "ii-researcher>=0.1.5",
     "jsonschema>=4.23.0",
     "mammoth>=1.9.0",
