@@ -32,7 +32,12 @@ const SettingsDrawer = ({ isOpen, onClose }: SettingsDrawerProps) => {
 
   // Get selected model from cookies on init
   useEffect(() => {
-    const savedModel = Cookies.get("selected_model");
+    let savedModel = Cookies.get("selected_model");
+    if (savedModel && !savedModel.startsWith("openrouter/")) {
+      if (savedModel.startsWith("openai/") || savedModel.startsWith("google/")) {
+        savedModel = `openrouter/${savedModel}`;
+      }
+    }
     if (savedModel) {
       dispatch({ type: "SET_SELECTED_MODEL", payload: savedModel });
       setCustomModel(savedModel);

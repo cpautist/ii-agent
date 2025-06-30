@@ -138,7 +138,7 @@ SERPAPI_API_KEY=your_serpapi_key
 ```
 chmod +x start.sh stop.sh
 LLM_CLIENT=openrouter-direct \
-MODEL_NAME=openai/gpt-4.1 \
+MODEL_NAME=openrouter/openai/gpt-4.1 \
 OPENROUTER_API_KEY=your_openrouter_key \
 ./start.sh   # On Windows: .\start.ps1
 ```
