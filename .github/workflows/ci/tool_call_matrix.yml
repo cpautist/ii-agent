@@ -1,0 +1,94 @@
+name: Tool Call Matrix
+
+on:
+  workflow_dispatch:
+
+jobs:
+  set-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: set
+        run: |
+          python - <<'PY' > matrix.json
+import json, sys
+sys.path.insert(0, 'src')
+from ii_agent.core.config.model_tool_map import MODEL_TOOL_DEFAULTS
+print(json.dumps([{"model_name": m, "prompt": "Hello"} for m in MODEL_TOOL_DEFAULTS.keys()]))
+PY
+          echo "matrix=$(cat matrix.json)" >> "$GITHUB_OUTPUT"
+
+  tool-call:
+    needs: set-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.set-matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: pip install -e .
+      - name: Run agent
+        env:
+          MODEL_NAME: ${{ matrix.model_name }}
+          PROMPT: ${{ matrix.prompt }}
+        run: |
+          python - <<'PY'
+import sys, os, asyncio, tempfile, logging
+from pathlib import Path
+sys.path.insert(0, 'tests')
+import conftest
+sys.path.insert(0, 'src')
+from ii_agent.agents.function_call import FunctionCallAgent
+from ii_agent.llm.base import LLMClient, ToolCall, TextResult
+from ii_agent.llm.message_history import MessageHistory
+from ii_agent.tools.base import LLMTool, ToolImplOutput
+from ii_agent.utils.workspace_manager import WorkspaceManager
+from ii_agent.core.event import EventType
+
+class DummyContextManager:
+    def apply_truncation_if_needed(self, messages):
+        return messages
+    def count_tokens(self, messages):
+        return 0
+
+class DummyLLM(LLMClient):
+    def __init__(self, model_name):
+        self.model_name = model_name
+        self.called = False
+    def generate(self, *args, **kwargs):
+        if not self.called:
+            self.called = True
+            return [ToolCall(tool_call_id='1', tool_name='echo_tool', tool_input={'msg':'hi'})], None
+        return [TextResult(text='done')], None
+
+class EchoTool(LLMTool):
+    name = 'echo_tool'
+    description = 'echo'
+    input_schema = {'type':'object','properties':{'msg':{'type':'string'}},'required':['msg']}
+    async def run_impl(self, tool_input, message_history=None):
+        return ToolImplOutput(tool_output=tool_input['msg'], tool_result_message='ok')
+
+async def run():
+    agent = FunctionCallAgent(
+        system_prompt='',
+        client=DummyLLM(os.environ['MODEL_NAME']),
+        tools=[EchoTool()],
+        init_history=MessageHistory(context_manager=DummyContextManager()),
+        workspace_manager=WorkspaceManager(Path(tempfile.mkdtemp())),
+        message_queue=asyncio.Queue(),
+        logger_for_agent_logs=logging.getLogger('test'),
+        max_turns=1,
+    )
+    await agent.run_agent_async(os.environ['PROMPT'])
+    events = []
+    while not agent.message_queue.empty():
+        events.append(await agent.message_queue.get())
+    assert events and events[0].type == EventType.TOOL_CALL, 'Missing tool call in first response'
+
+asyncio.run(run())
+PY
